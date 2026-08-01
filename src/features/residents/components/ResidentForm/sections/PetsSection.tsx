@@ -3,6 +3,7 @@ import { PawPrint } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
 import { RepeatableFields } from '@/shared/components/RepeatableFields/RepeatableFields';
+import { upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 import { PET_SPECIES, PET_SPECIES_LABELS } from '../../../model/resident.types';
 
@@ -27,6 +28,7 @@ export function PetsSection() {
               <Form.Item
                 name={[index, 'name']}
                 label="Nome"
+                normalize={upperCase}
                 rules={[rules.required(), rules.text(1, 60)]}
               >
                 <Input placeholder="Rex" />

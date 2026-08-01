@@ -2,7 +2,7 @@ import { Col, Form, Input, Row } from 'antd';
 import { KeyRound } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
-import { maskPhone } from '@/shared/utils/masks';
+import { maskPhone, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 
 /** Only rendered for tenants: the condominium must know who owns the unit. */
@@ -18,6 +18,7 @@ export function LandlordSection() {
           <Form.Item
             name={['landlord', 'name']}
             label="Proprietário/Administradora"
+            normalize={upperCase}
             rules={[rules.required(), rules.text(3, 150)]}
           >
             <Input placeholder="Nome do proprietário ou da administradora" />

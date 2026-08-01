@@ -3,7 +3,7 @@ import { Users } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
 import { RepeatableFields } from '@/shared/components/RepeatableFields/RepeatableFields';
-import { maskRg } from '@/shared/utils/masks';
+import { maskRg, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 import { KINSHIP_OPTIONS, OTHER_KINSHIP } from '../../../model/kinship';
 
@@ -24,6 +24,7 @@ function HouseholdMemberFields({ index }: HouseholdMemberFieldsProps) {
         <Form.Item
           name={[index, 'fullName']}
           label="Nome e sobrenome"
+          normalize={upperCase}
           rules={[rules.required(), rules.text(3, 150)]}
         >
           <Input placeholder="Nome completo" />

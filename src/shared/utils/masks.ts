@@ -6,6 +6,11 @@ export function onlyAlphanumeric(value: string | undefined | null): string {
   return (value ?? '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
+/** Nomes ficam em caixa alta para padronizar listagem, busca e PDF. */
+export function upperCase(value: string | undefined): string {
+  return (value ?? '').toUpperCase();
+}
+
 export function maskCpf(value: string | undefined): string {
   const digits = onlyDigits(value).slice(0, 11);
 

@@ -2,7 +2,7 @@ import { Col, Form, Input, Row } from 'antd';
 import { LifeBuoy } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
-import { maskPhone } from '@/shared/utils/masks';
+import { maskPhone, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 
 export function EmergencyContactSection() {
@@ -17,6 +17,7 @@ export function EmergencyContactSection() {
           <Form.Item
             name={['emergencyContact', 'name']}
             label="Nome"
+            normalize={upperCase}
             rules={[rules.required(), rules.text(3, 150)]}
           >
             <Input placeholder="Nome e sobrenome" />

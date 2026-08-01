@@ -1,6 +1,13 @@
 import dayjs from 'dayjs';
 
-import { maskCpf, maskPhone, maskPlate, onlyAlphanumeric, onlyDigits } from '@/shared/utils/masks';
+import {
+  maskCpf,
+  maskPhone,
+  maskPlate,
+  onlyAlphanumeric,
+  onlyDigits,
+  upperCase,
+} from '@/shared/utils/masks';
 import { isListedKinship, OTHER_KINSHIP } from './kinship';
 import type { HouseholdMemberFormValues, ResidentFormValues } from './resident-form.types';
 import type { HouseholdMember, Resident, ResidentPayload } from './resident.types';
@@ -11,11 +18,16 @@ function trimmed(value: string | undefined): string {
   return (value ?? '').trim();
 }
 
+/** Espelha a caixa alta do formulário em fichas antigas reenviadas sem reescrever o nome. */
+function upperName(value: string | undefined): string {
+  return upperCase(trimmed(value));
+}
+
 function toHouseholdMember(member: HouseholdMemberFormValues): HouseholdMember {
   const kinship = trimmed(member.kinship);
 
   return {
-    fullName: trimmed(member.fullName),
+    fullName: upperName(member.fullName),
     rg: trimmed(member.rg),
     kinship: kinship === OTHER_KINSHIP ? trimmed(member.kinshipOther) : kinship,
   };
@@ -38,7 +50,7 @@ export const residentFormMapper = {
     return {
       unit: trimmed(values.unit),
       occupancyType: values.occupancyType,
-      fullName: trimmed(values.fullName),
+      fullName: upperName(values.fullName),
       rg: trimmed(values.rg),
       cpf: onlyDigits(values.cpf),
       email: trimmed(values.email).toLowerCase(),
@@ -46,19 +58,19 @@ export const residentFormMapper = {
       mobilePhone: onlyDigits(values.mobilePhone),
       movedInAt: values.movedInAt.format(DATE_FORMAT),
       emergencyContact: {
-        name: trimmed(values.emergencyContact.name),
+        name: upperName(values.emergencyContact.name),
         phone: onlyDigits(values.emergencyContact.phone),
       },
       landlord:
         values.occupancyType === 'TENANT' && values.landlord
           ? {
-              name: trimmed(values.landlord.name),
+              name: upperName(values.landlord.name),
               phone: onlyDigits(values.landlord.phone),
             }
           : null,
       householdMembers: (values.householdMembers ?? []).map(toHouseholdMember),
       employees: (values.employees ?? []).map((employee) => ({
-        fullName: trimmed(employee.fullName),
+        fullName: upperName(employee.fullName),
         rg: trimmed(employee.rg),
         role: trimmed(employee.role),
         workSchedule: trimmed(employee.workSchedule),
@@ -70,7 +82,7 @@ export const residentFormMapper = {
         plate: onlyAlphanumeric(vehicle.plate),
       })),
       pets: (values.pets ?? []).map((pet) => ({
-        name: trimmed(pet.name),
+        name: upperName(pet.name),
         species: pet.species ?? 'OTHER',
         breed: trimmed(pet.breed) === '' ? null : trimmed(pet.breed),
         color: trimmed(pet.color),

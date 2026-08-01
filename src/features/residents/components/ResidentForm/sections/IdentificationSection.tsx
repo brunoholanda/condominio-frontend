@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { IdCard } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
-import { maskCpf, maskPhone, maskRg } from '@/shared/utils/masks';
+import { maskCpf, maskPhone, maskRg, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 import { BUILDING_HANDOVER_DATE, UNIT_OPTIONS } from '../../../model/condo';
 import { OCCUPANCY_TYPE_LABELS, OCCUPANCY_TYPES } from '../../../model/resident.types';
@@ -69,6 +69,7 @@ export function IdentificationSection() {
           <Form.Item
             name="fullName"
             label="Nome completo"
+            normalize={upperCase}
             rules={[rules.required(), rules.text(3, 150)]}
           >
             <Input placeholder="Nome e sobrenome" autoComplete="name" />

@@ -3,7 +3,7 @@ import { Briefcase } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
 import { RepeatableFields } from '@/shared/components/RepeatableFields/RepeatableFields';
-import { maskRg } from '@/shared/utils/masks';
+import { maskRg, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 
 export function EmployeesSection() {
@@ -25,6 +25,7 @@ export function EmployeesSection() {
               <Form.Item
                 name={[index, 'fullName']}
                 label="Nome e sobrenome"
+                normalize={upperCase}
                 rules={[rules.required(), rules.text(3, 150)]}
               >
                 <Input placeholder="Nome completo" />

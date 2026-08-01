@@ -32,6 +32,17 @@ export const OPERATOR_REMINDER =
   'Você está vendo dados pessoais protegidos pela LGPD. Use-os apenas para o controle e a organização do condomínio, ' +
   'não os compartilhe fora desta área e lembre-se de que consultas, exportações e exclusões ficam registradas.';
 
+/** Antes de abrir a edição: o cadastro é uma declaração assinada pelo morador. */
+export const EDIT_WARNING =
+  'Você vai abrir para alteração dados pessoais protegidos pela Lei 13.709/2018 (LGPD). O cadastro é uma declaração ' +
+  'assinada pelo morador: corrija somente o que ele pediu, confira cada campo antes de salvar e não preencha informações ' +
+  'por conta própria. O que você salvar substitui o registro anterior, e a alteração fica registrada com a sua identificação.';
+
+/** Cabeçalho da consulta somente leitura, onde a ficha inteira fica exposta. */
+export const VIEW_ONLY_NOTICE =
+  'Consulta somente leitura: nada nesta tela altera o cadastro. A abertura da ficha completa fica registrada com a sua ' +
+  'identificação, e os dados não devem ser fotografados, copiados ou repassados para fora desta área.';
+
 export const EXPORT_WARNING =
   'O PDF traz nome, RG, CPF, telefones e a assinatura de cada morador, além dos dados de familiares e funcionários da ' +
   'unidade. Ao baixar, você passa a ser responsável pela guarda do arquivo: mantenha-o em local seguro, não o repasse a ' +

@@ -1,6 +1,6 @@
 import { App, Button, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { FileDown, Pencil, Search, Trash2, UserPlus } from 'lucide-react';
+import { Eye, FileDown, Pencil, Search, Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,9 +8,10 @@ import { ApiError } from '@/shared/api/api-error';
 import { DataProtectionNotice } from '@/shared/components/DataProtectionNotice/DataProtectionNotice';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
-import { EXPORT_WARNING } from '@/shared/privacy/operator-duties';
+import { EDIT_WARNING, EXPORT_WARNING } from '@/shared/privacy/operator-duties';
 import { maskCpf, maskPhone } from '@/shared/utils/masks';
 import { queries } from '@/styles/theme';
+import { ResidentDetailsDrawer } from '../components/ResidentDetailsDrawer/ResidentDetailsDrawer';
 import { ResidentsSummary } from '../components/ResidentsSummary/ResidentsSummary';
 import {
   useDeleteResidentMutation,
@@ -33,6 +34,8 @@ export function ResidentsListPage() {
   const { message, modal } = App.useApp();
   const isMobile = useMediaQuery(queries.downMd);
   const [filters, setFilters] = useState<ResidentFilters>(INITIAL_FILTERS);
+  const [viewingId, setViewingId] = useState<string>();
+  const [isViewOpen, setIsViewOpen] = useState(false);
 
   const residentsQuery = useResidentsQuery(filters);
   const deleteResident = useDeleteResidentMutation();
@@ -66,6 +69,28 @@ export function ResidentsListPage() {
       cancelText: 'Cancelar',
       width: 560,
       onOk: downloadPdf,
+    });
+  };
+
+  const openDetails = (resident: ResidentListItem) => {
+    setViewingId(resident.id);
+    setIsViewOpen(true);
+  };
+
+  /**
+   * A edição altera uma declaração assinada pelo morador, então o operador passa
+   * antes pelas regras da LGPD — inclusive quando entra pela consulta.
+   */
+  const confirmEdit = (resident: { id: string; unit: string }) => {
+    setIsViewOpen(false);
+
+    modal.confirm({
+      title: `Editar o cadastro da unidade ${resident.unit}?`,
+      content: EDIT_WARNING,
+      okText: 'Entendi, quero editar',
+      cancelText: 'Cancelar',
+      width: 560,
+      onOk: () => void navigate(`/moradores/${resident.id}`),
     });
   };
 
@@ -121,16 +146,25 @@ export function ResidentsListPage() {
     {
       title: 'Ações',
       key: 'actions',
-      width: isMobile ? 96 : 160,
+      width: isMobile ? 132 : 230,
       align: 'right',
       render: (_value, resident) => (
         <S.RowActions>
           <Button
             type="text"
             size="small"
+            icon={<Eye size={15} />}
+            aria-label={`Visualizar cadastro de ${resident.fullName}`}
+            onClick={() => openDetails(resident)}
+          >
+            {isMobile ? null : 'Visualizar'}
+          </Button>
+          <Button
+            type="text"
+            size="small"
             icon={<Pencil size={15} />}
             aria-label={`Editar cadastro de ${resident.fullName}`}
-            onClick={() => void navigate(`/moradores/${resident.id}`)}
+            onClick={() => confirmEdit(resident)}
           >
             {isMobile ? null : 'Editar'}
           </Button>
@@ -153,7 +187,7 @@ export function ResidentsListPage() {
     <>
       <PageHeading
         title="Moradores cadastrados"
-        description="Consulte, edite ou remova os cadastros enviados pelas unidades. O PDF traz uma página por morador e segue os filtros aplicados."
+        description="Visualize, edite ou remova os cadastros enviados pelas unidades. A visualização abre a ficha completa somente para leitura. O PDF traz uma página por morador e segue os filtros aplicados."
         actions={
           <Space wrap size={8}>
             <Button
@@ -218,6 +252,13 @@ export function ResidentsListPage() {
           showTotal: isMobile ? undefined : (count) => `${count} cadastro(s)`,
           onChange: (page, limit) => setFilters((current) => ({ ...current, page, limit })),
         }}
+      />
+
+      <ResidentDetailsDrawer
+        residentId={viewingId}
+        open={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        onEdit={confirmEdit}
       />
     </>
   );

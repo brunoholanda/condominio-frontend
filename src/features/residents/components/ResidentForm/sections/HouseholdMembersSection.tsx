@@ -37,7 +37,7 @@ function HouseholdMemberFields({ index }: HouseholdMemberFieldsProps) {
           normalize={maskRg}
           rules={[rules.required(), rules.text(5, 20)]}
         >
-          <Input placeholder="12.345.678-9" />
+          <Input placeholder="12.345.678-9" inputMode="numeric" />
         </Form.Item>
       </Col>
 
@@ -71,7 +71,7 @@ export function HouseholdMembersSection() {
     <FormSection
       icon={<Users size={18} />}
       title="Demais moradores da unidade"
-      description="Todas as pessoas que residem no apartamento além do titular."
+      description="Informe aqui todas as pessoas que moram no apartamento além de você — elas não preenchem outro formulário. Avise cada uma de que os dados ficam no cadastro do condomínio."
     >
       <RepeatableFields
         name="householdMembers"

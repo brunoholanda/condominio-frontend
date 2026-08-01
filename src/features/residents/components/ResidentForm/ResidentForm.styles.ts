@@ -6,6 +6,16 @@ export const Sections = styled.div`
   gap: ${({ theme }) => theme.spacing(6)};
 `;
 
+/** O número precisa saltar aos olhos: é a última chance de corrigir a unidade. */
+export const ConfirmedUnit = styled.strong`
+  display: block;
+  margin: ${({ theme }) => `${theme.spacing(3)} 0`};
+  color: ${({ theme }) => theme.colors.primary};
+  font-size: 2rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+`;
+
 export const Actions = styled.div`
   position: sticky;
   bottom: 0;

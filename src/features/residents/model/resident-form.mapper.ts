@@ -36,7 +36,7 @@ export const residentFormMapper = {
     const landline = onlyDigits(values.landlinePhone);
 
     return {
-      unit: trimmed(values.unit).toUpperCase(),
+      unit: trimmed(values.unit),
       occupancyType: values.occupancyType,
       fullName: trimmed(values.fullName),
       rg: trimmed(values.rg),
@@ -77,7 +77,6 @@ export const residentFormMapper = {
       })),
       dataUsageConsent: values.dataUsageConsent,
       signature: values.signature,
-      signedAt: values.signedAt.format(DATE_FORMAT),
     };
   },
 
@@ -120,5 +119,4 @@ export const emptyResidentFormValues: Partial<ResidentFormValues> = {
   vehicles: [],
   pets: [],
   dataUsageConsent: false,
-  signedAt: dayjs(),
 };

@@ -141,7 +141,8 @@ export const UserName = styled.span`
 
   ${({ theme }) => theme.media.down.md} {
     max-width: 100%;
-    flex-basis: 100%;
+    flex: 1 1 auto;
+    padding-inline: ${({ theme }) => theme.spacing(2)};
     font-size: 0.8rem;
   }
 `;
@@ -160,12 +161,18 @@ export const Main = styled.main`
 export const Footer = styled.footer`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: ${({ theme }) => theme.spacing(1)};
   padding: ${({ theme }) => theme.spacing(5)};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.8rem;
   text-align: center;
+
+  > span {
+    max-width: 720px;
+    line-height: 1.5;
+  }
 `;
 
 export const Copyright = styled.small`

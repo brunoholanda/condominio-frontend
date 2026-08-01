@@ -1,16 +1,23 @@
-import { App, Button, Input, Popconfirm, Select, Table, Tag } from 'antd';
+import { App, Button, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Pencil, Search, Trash2, UserPlus } from 'lucide-react';
+import { FileDown, Pencil, Search, Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ApiError } from '@/shared/api/api-error';
+import { DataProtectionNotice } from '@/shared/components/DataProtectionNotice/DataProtectionNotice';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { EXPORT_WARNING } from '@/shared/privacy/operator-duties';
 import { maskCpf, maskPhone } from '@/shared/utils/masks';
 import { queries } from '@/styles/theme';
-import { useDeleteResidentMutation, useResidentsQuery } from '../hooks/use-residents';
-import type { OccupancyType, Resident, ResidentFilters } from '../model/resident.types';
+import { ResidentsSummary } from '../components/ResidentsSummary/ResidentsSummary';
+import {
+  useDeleteResidentMutation,
+  useResidentsQuery,
+  useResidentsReportMutation,
+} from '../hooks/use-residents';
+import type { OccupancyType, ResidentListItem, ResidentFilters } from '../model/resident.types';
 import { OCCUPANCY_TYPE_LABELS, OCCUPANCY_TYPES } from '../model/resident.types';
 import * as S from './ResidentsListPage.styles';
 
@@ -23,14 +30,46 @@ const OCCUPANCY_FILTER_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
 
 export function ResidentsListPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const isMobile = useMediaQuery(queries.downMd);
   const [filters, setFilters] = useState<ResidentFilters>(INITIAL_FILTERS);
 
   const residentsQuery = useResidentsQuery(filters);
   const deleteResident = useDeleteResidentMutation();
+  const downloadReport = useResidentsReportMutation();
 
-  const handleDelete = (resident: Resident) => {
+  const total = residentsQuery.data?.total ?? 0;
+
+  const downloadPdf = () => {
+    const { search, unit, occupancyType } = filters;
+
+    downloadReport.mutate(
+      { search, unit, occupancyType },
+      {
+        onSuccess: () => message.success(`PDF gerado com ${total} cadastro(s).`),
+        onError: (error: unknown) =>
+          message.error(
+            error instanceof ApiError && error.status === 404
+              ? 'Nenhum morador encontrado para os filtros aplicados.'
+              : 'Não foi possível gerar o PDF. Tente novamente.',
+          ),
+      },
+    );
+  };
+
+  /** O arquivo sai do sistema e vira responsabilidade de quem baixa: avisa antes. */
+  const handleDownloadReport = () => {
+    modal.confirm({
+      title: `Exportar ${total} cadastro(s) em PDF?`,
+      content: EXPORT_WARNING,
+      okText: 'Baixar PDF',
+      cancelText: 'Cancelar',
+      width: 560,
+      onOk: downloadPdf,
+    });
+  };
+
+  const handleDelete = (resident: ResidentListItem) => {
     deleteResident.mutate(resident.id, {
       onSuccess: () => message.success(`Cadastro de ${resident.fullName} removido.`),
       onError: (error: unknown) =>
@@ -40,7 +79,7 @@ export function ResidentsListPage() {
     });
   };
 
-  const columns: ColumnsType<Resident> = [
+  const columns: ColumnsType<ResidentListItem> = [
     {
       title: 'Unidade',
       dataIndex: 'unit',
@@ -77,7 +116,7 @@ export function ResidentsListPage() {
       width: 100,
       align: 'center',
       responsive: ['xl'],
-      render: (vehicles: Resident['vehicles']) => vehicles.length,
+      render: (vehicles: ResidentListItem['vehicles']) => vehicles.length,
     },
     {
       title: 'Ações',
@@ -114,17 +153,31 @@ export function ResidentsListPage() {
     <>
       <PageHeading
         title="Moradores cadastrados"
-        description="Consulte, edite ou remova os cadastros enviados pelas unidades."
+        description="Consulte, edite ou remova os cadastros enviados pelas unidades. O PDF traz uma página por morador e segue os filtros aplicados."
         actions={
-          <Button
-            type="primary"
-            icon={<UserPlus size={16} />}
-            onClick={() => void navigate('/cadastro')}
-          >
-            Novo cadastro
-          </Button>
+          <Space wrap size={8}>
+            <Button
+              icon={<FileDown size={16} />}
+              loading={downloadReport.isPending}
+              disabled={total === 0}
+              onClick={handleDownloadReport}
+            >
+              Baixar PDF
+            </Button>
+            <Button
+              type="primary"
+              icon={<UserPlus size={16} />}
+              onClick={() => void navigate('/cadastro')}
+            >
+              Novo cadastro
+            </Button>
+          </Space>
         }
       />
+
+      <DataProtectionNotice />
+
+      <ResidentsSummary />
 
       <S.Filters>
         <Input
@@ -149,7 +202,7 @@ export function ResidentsListPage() {
         />
       </S.Filters>
 
-      <Table<Resident>
+      <Table<ResidentListItem>
         rowKey="id"
         columns={columns}
         dataSource={residentsQuery.data?.items ?? []}
@@ -159,10 +212,10 @@ export function ResidentsListPage() {
         pagination={{
           current: filters.page,
           pageSize: filters.limit,
-          total: residentsQuery.data?.total ?? 0,
+          total,
           simple: isMobile,
           showSizeChanger: !isMobile,
-          showTotal: isMobile ? undefined : (total) => `${total} cadastro(s)`,
+          showTotal: isMobile ? undefined : (count) => `${count} cadastro(s)`,
           onChange: (page, limit) => setFilters((current) => ({ ...current, page, limit })),
         }}
       />

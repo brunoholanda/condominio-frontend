@@ -5,6 +5,8 @@ export const queries = {
   upLg: '(min-width: 1024px)',
   downSm: '(max-width: 575.98px)',
   downMd: '(max-width: 767.98px)',
+  /** Phone held upright, where a wide drawing area barely fits. */
+  portraitPhone: '(max-width: 767.98px) and (orientation: portrait)',
 } as const;
 
 /** Design tokens shared by styled-components and the Ant Design theme. */

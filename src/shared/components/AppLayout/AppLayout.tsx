@@ -2,6 +2,7 @@ import { Building2, ClipboardList, LogIn, LogOut, UserPlus } from 'lucide-react'
 import { Outlet } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { PrivacyNoticeLink } from '@/shared/components/PrivacyNotice/PrivacyNotice';
 import * as S from './AppLayout.styles';
 
 export function AppLayout() {
@@ -25,13 +26,13 @@ export function AppLayout() {
             <UserPlus size={16} aria-hidden />
             Novo cadastro
           </S.NavItem>
-          <S.NavItem to="/moradores">
-            <ClipboardList size={16} aria-hidden />
-            Moradores
-          </S.NavItem>
 
           {isAuthenticated ? (
             <>
+              <S.NavItem to="/moradores">
+                <ClipboardList size={16} aria-hidden />
+                Moradores
+              </S.NavItem>
               <S.UserName title={session?.user.email}>{session?.user.name}</S.UserName>
               <S.NavButton type="button" onClick={logout}>
                 <LogOut size={16} aria-hidden />
@@ -53,7 +54,9 @@ export function AppLayout() {
 
       <S.Footer>
         <span>
-          Os dados coletados são utilizados exclusivamente para controle e organização do condomínio.
+          Os dados coletados são utilizados exclusivamente para o controle e a organização do
+          condomínio, conforme a Lei 13.709/2018 (LGPD). Consulte o <PrivacyNoticeLink /> para saber
+          quais são os seus direitos.
         </span>
         <S.Copyright>
           © {new Date().getFullYear()} Holanda Dev Software. Todos os direitos reservados.

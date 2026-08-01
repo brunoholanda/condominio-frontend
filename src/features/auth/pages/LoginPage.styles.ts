@@ -43,3 +43,13 @@ export const Subtitle = styled.p`
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.9rem;
 `;
+
+export const Warning = styled.p`
+  margin: ${({ theme }) => `${theme.spacing(5)} 0 0`};
+  padding-top: ${({ theme }) => theme.spacing(4)};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.textMuted};
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+`;

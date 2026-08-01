@@ -12,14 +12,25 @@ import { ApiError } from '@/shared/api/api-error';
 import { setUnauthorizedHandler } from '@/shared/api/http-client';
 import { authApi } from '../api/auth.api';
 import { authSessionStore } from '../model/auth-session.store';
-import type { AuthenticatedUser, AuthSession, LoginPayload } from '../model/auth.types';
+import type {
+  AuthenticatedUser,
+  AuthSession,
+  LoginChallenge,
+  LoginPayload,
+} from '../model/auth.types';
 
 interface AuthContextValue {
   session: AuthSession | null;
   isAuthenticated: boolean;
   /** True while the stored token is being revalidated against the API. */
   isBootstrapping: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
+  /** Primeira etapa: não abre sessão, apenas dispara o código por e-mail. */
+  login: (payload: LoginPayload) => Promise<LoginChallenge>;
+  /** Segunda etapa: o código confere e a sessão finalmente é criada. */
+  confirmLogin: (challengeId: string, code: string) => Promise<void>;
+  resendLoginCode: (challengeId: string) => Promise<LoginChallenge>;
+  /** Registra o CPF de responsabilidade do operador e atualiza a sessão. */
+  identify: (cpf: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -41,13 +52,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   }, []);
 
-  const login = useCallback(async (payload: LoginPayload) => {
-    const response = await authApi.login(payload);
+  const login = useCallback((payload: LoginPayload) => authApi.login(payload), []);
+
+  const resendLoginCode = useCallback(
+    (challengeId: string) => authApi.resendLoginCode(challengeId),
+    [],
+  );
+
+  const confirmLogin = useCallback(async (challengeId: string, code: string) => {
+    const response = await authApi.confirmLogin({ challengeId, code });
 
     authSessionStore.write({ accessToken: response.accessToken, user: response.user });
     setAccessToken(response.accessToken);
     setUser(response.user);
   }, []);
+
+  const identify = useCallback(
+    async (cpf: string) => {
+      const identified = await authApi.identify(cpf);
+
+      if (accessToken) {
+        authSessionStore.write({ accessToken, user: identified });
+      }
+
+      setUser(identified);
+    },
+    [accessToken],
+  );
 
   useEffect(() => {
     setUnauthorizedHandler(logout);
@@ -100,9 +131,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: session !== null,
       isBootstrapping,
       login,
+      confirmLogin,
+      resendLoginCode,
+      identify,
       logout,
     };
-  }, [accessToken, isBootstrapping, login, logout, user]);
+  }, [
+    accessToken,
+    confirmLogin,
+    identify,
+    isBootstrapping,
+    login,
+    logout,
+    resendLoginCode,
+    user,
+  ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

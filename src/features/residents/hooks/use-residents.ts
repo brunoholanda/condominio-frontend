@@ -1,13 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { saveFile } from '@/shared/utils/download-file';
 import { residentsApi } from '../api/residents.api';
-import type { ResidentFilters, ResidentPayload } from '../model/resident.types';
+import type {
+  ResidentFilters,
+  ResidentPayload,
+  ResidentSearchFilters,
+} from '../model/resident.types';
 
 export const residentKeys = {
   all: ['residents'] as const,
   list: (filters: ResidentFilters) => [...residentKeys.all, 'list', filters] as const,
   detail: (id: string) => [...residentKeys.all, 'detail', id] as const,
+  summary: () => [...residentKeys.all, 'summary'] as const,
 };
+
+/** Counters of the restricted area; refreshed by every save or removal. */
+export function useResidentsSummaryQuery() {
+  return useQuery({
+    queryKey: residentKeys.summary(),
+    queryFn: () => residentsApi.summary(),
+  });
+}
 
 export function useResidentsQuery(filters: ResidentFilters) {
   return useQuery({
@@ -37,6 +51,14 @@ export function useSaveResidentMutation() {
     mutationFn: ({ id, payload }: SaveResidentInput) =>
       id ? residentsApi.update(id, payload) : residentsApi.create(payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: residentKeys.all }),
+  });
+}
+
+/** Downloads the PDF report and hands it straight to the browser. */
+export function useResidentsReportMutation() {
+  return useMutation({
+    mutationFn: (filters: ResidentSearchFilters) => residentsApi.downloadReport(filters),
+    onSuccess: (file) => saveFile(file),
   });
 }
 

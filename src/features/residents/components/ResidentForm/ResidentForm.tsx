@@ -30,6 +30,28 @@ export function ResidentForm({
   const { modal } = App.useApp();
   const occupancyType = Form.useWatch('occupancyType', form);
 
+  /**
+   * Última conferência da unidade: é o campo que amarra a ficha ao apartamento,
+   * só aceita um formulário por número e não dá para trocar depois sem passar
+   * pela administração.
+   */
+  const confirmUnit = (values: ResidentFormValues) => {
+    modal.confirm({
+      title: 'Confirme a unidade do cadastro',
+      okText: submitLabel,
+      cancelText: 'Revisar',
+      width: 460,
+      content: (
+        <>
+          <S.ConfirmedUnit>{values.unit}</S.ConfirmedUnit>
+          Confira o número do apartamento antes de continuar. Cada unidade tem um único formulário,
+          que vale para todos os moradores informados aqui.
+        </>
+      ),
+      onOk: () => onSubmit(values),
+    });
+  };
+
   const confirmReset = () => {
     modal.confirm({
       title: 'Limpar formulário?',
@@ -48,7 +70,7 @@ export function ResidentForm({
       requiredMark="optional"
       scrollToFirstError
       initialValues={initialValues ?? emptyResidentFormValues}
-      onFinish={onSubmit}
+      onFinish={confirmUnit}
       disabled={submitting}
     >
       <S.Sections>

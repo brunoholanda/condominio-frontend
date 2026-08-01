@@ -11,7 +11,7 @@ export function EmployeesSection() {
     <FormSection
       icon={<Briefcase size={18} />}
       title="Funcionário(s) da unidade"
-      description="Profissionais que prestam serviço no apartamento e precisam de acesso."
+      description="Profissionais que prestam serviço no apartamento. Informe apenas quem realmente trabalha na unidade e avise cada um sobre o cadastro."
     >
       <RepeatableFields
         name="employees"
@@ -38,7 +38,7 @@ export function EmployeesSection() {
                 normalize={maskRg}
                 rules={[rules.required(), rules.text(5, 20)]}
               >
-                <Input placeholder="12.345.678-9" />
+                <Input placeholder="12.345.678-9" inputMode="numeric" />
               </Form.Item>
             </Col>
 

@@ -11,7 +11,7 @@ export function VehiclesSection() {
     <FormSection
       icon={<Car size={18} />}
       title="Veículos da unidade"
-      description="Carros, motos e demais veículos autorizados a acessar a garagem."
+      description="Carros, motos e demais veículos que usam a garagem da unidade."
     >
       <RepeatableFields
         name="vehicles"

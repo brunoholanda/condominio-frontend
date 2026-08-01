@@ -54,5 +54,6 @@ export interface ResidentFormValues {
   pets?: PetFormValues[];
   dataUsageConsent: boolean;
   signature: string;
-  signedAt: Dayjs;
+  /** Only present when editing: new registrations are dated by the API. */
+  signedAt?: Dayjs;
 }

@@ -2,6 +2,7 @@ import { Spin } from 'antd';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
+import { OperatorTermsGate } from './OperatorTermsGate';
 import * as S from './ProtectedRoute.styles';
 
 /** Blocks unauthenticated access and remembers where the user wanted to go. */
@@ -21,5 +22,9 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  return <Outlet />;
+  return (
+    <OperatorTermsGate>
+      <Outlet />
+    </OperatorTermsGate>
+  );
 }

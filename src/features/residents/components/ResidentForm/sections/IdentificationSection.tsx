@@ -1,10 +1,12 @@
-import { Col, DatePicker, Form, Input, Radio, Row } from 'antd';
+import { Checkbox, Col, DatePicker, Form, Input, Radio, Row, Select } from 'antd';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { IdCard } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
 import { maskCpf, maskPhone, maskRg } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
+import { BUILDING_HANDOVER_DATE, UNIT_OPTIONS } from '../../../model/condo';
 import { OCCUPANCY_TYPE_LABELS, OCCUPANCY_TYPES } from '../../../model/resident.types';
 
 const OCCUPANCY_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
@@ -13,20 +15,41 @@ const OCCUPANCY_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
 }));
 
 export function IdentificationSection() {
+  const form = Form.useFormInstance();
+  const movedInAt = Form.useWatch<Dayjs | undefined>('movedInAt', form);
+  // The shortcut is not a field of its own: it simply reflects the date below.
+  const sinceHandover = Boolean(movedInAt?.isSame(BUILDING_HANDOVER_DATE, 'day'));
+
+  const handleSinceHandover = (checked: boolean) => {
+    form.setFieldValue('movedInAt', checked ? BUILDING_HANDOVER_DATE : undefined);
+
+    // Clearing the date leaves the field pending, not wrong: only the filled
+    // date is worth validating right away, to drop an error already on screen.
+    if (checked) {
+      void form.validateFields(['movedInAt']);
+    }
+  };
+
   return (
     <FormSection
       icon={<IdCard size={18} />}
       title="Identificação do morador"
-      description="Dados principais de quem está sendo cadastrado na unidade."
+      description="Dados de quem está preenchendo o formulário em nome da unidade. Os demais moradores entram mais adiante, na seção “Demais moradores da unidade”."
     >
       <Row gutter={16}>
         <Col xs={24} sm={8} md={6}>
           <Form.Item
             name="unit"
             label="Unidade/Apartamento"
-            rules={[rules.required(), rules.text(1, 20)]}
+            rules={[rules.required('Selecione a unidade do morador')]}
           >
-            <Input placeholder="A-101" autoComplete="off" />
+            <Select
+              showSearch
+              options={UNIT_OPTIONS}
+              placeholder="Selecione"
+              optionFilterProp="label"
+              notFoundContent="Unidade inexistente no condomínio"
+            />
           </Form.Item>
         </Col>
 
@@ -59,7 +82,7 @@ export function IdentificationSection() {
             normalize={maskRg}
             rules={[rules.required(), rules.text(5, 20)]}
           >
-            <Input placeholder="12.345.678-9" />
+            <Input placeholder="12.345.678-9" inputMode="numeric" />
           </Form.Item>
         </Col>
       </Row>
@@ -97,10 +120,23 @@ export function IdentificationSection() {
         </Col>
 
         <Col xs={24} sm={12} md={8}>
-          <Form.Item name="movedInAt" label="Quando mudou-se" rules={[rules.required()]}>
+          <Form.Item
+            name="movedInAt"
+            label="Quando mudou-se"
+            rules={[rules.required()]}
+            extra={
+              <Checkbox
+                checked={sinceHandover}
+                onChange={(event) => handleSinceHandover(event.target.checked)}
+              >
+                Desde a entrega do prédio
+              </Checkbox>
+            }
+          >
             <DatePicker
               format="DD/MM/YYYY"
               placeholder="Selecione a data"
+              minDate={BUILDING_HANDOVER_DATE}
               maxDate={dayjs()}
               style={{ width: '100%' }}
             />

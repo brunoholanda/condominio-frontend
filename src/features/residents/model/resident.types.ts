@@ -71,27 +71,45 @@ export interface ResidentPayload {
   dataUsageConsent: boolean;
   /** Handwritten signature as a base64 data URL. */
   signature: string;
-  signedAt: string;
 }
 
 export interface Resident extends ResidentPayload {
   id: string;
+  /** Date and time of the signature, stamped by the API. */
+  signedAt: string;
   createdAt: string;
   updatedAt: string;
 }
 
+/** A listagem não recebe a assinatura: a tabela não a mostra e ninguém precisa dela ali. */
+export type ResidentListItem = Omit<Resident, 'signature'>;
+
 export interface PaginatedResidents {
-  items: Resident[];
+  items: ResidentListItem[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 }
 
-export interface ResidentFilters {
-  page: number;
-  limit: number;
+/** How much of the condo already answered the form. */
+export interface ResidentsSummary {
+  totalUnits: number;
+  registeredUnits: number;
+  pendingUnits: number;
+  /** Quais unidades ainda não preencheram, em ordem. */
+  pendingUnitNumbers: string[];
+  totalPeople: number;
+}
+
+/** Criteria shared by the listing and by the PDF report. */
+export interface ResidentSearchFilters {
   search?: string;
   unit?: string;
   occupancyType?: OccupancyType;
+}
+
+export interface ResidentFilters extends ResidentSearchFilters {
+  page: number;
+  limit: number;
 }

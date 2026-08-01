@@ -11,6 +11,7 @@ import type {
 export const residentKeys = {
   all: ['residents'] as const,
   list: (filters: ResidentFilters) => [...residentKeys.all, 'list', filters] as const,
+  everyone: () => [...residentKeys.all, 'everyone'] as const,
   detail: (id: string) => [...residentKeys.all, 'detail', id] as const,
   summary: () => [...residentKeys.all, 'summary'] as const,
 };
@@ -27,6 +28,15 @@ export function useResidentsQuery(filters: ResidentFilters) {
   return useQuery({
     queryKey: residentKeys.list(filters),
     queryFn: () => residentsApi.list(filters),
+  });
+}
+
+/** Todos os cadastros de uma vez; só busca quando a tela que precisa deles abre. */
+export function useAllResidentsQuery(enabled: boolean) {
+  return useQuery({
+    queryKey: residentKeys.everyone(),
+    queryFn: () => residentsApi.listAll(),
+    enabled,
   });
 }
 

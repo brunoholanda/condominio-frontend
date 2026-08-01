@@ -12,6 +12,7 @@ export const Grid = styled.section`
 `;
 
 export const Card = styled.article`
+  position: relative;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(3)};
@@ -20,6 +21,19 @@ export const Card = styled.article`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.md};
   box-shadow: ${({ theme }) => theme.shadows.card};
+`;
+
+/** Card que abre alguma tela: reage ao toque em qualquer ponto dele. */
+export const InteractiveCard = styled(Card)`
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:hover,
+  &:focus-within {
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: ${({ theme }) => theme.shadows.header};
+  }
 `;
 
 export const Badge = styled.span`
@@ -56,7 +70,11 @@ export const Note = styled.span`
   color: ${({ theme }) => theme.colors.textMuted};
 `;
 
-/** Botão discreto dentro do card, para não competir com o número. */
+/**
+ * Botão discreto dentro do card, para não competir com o número. O pseudo-
+ * elemento cobre o card inteiro, então o clique vale em qualquer ponto dele sem
+ * precisar aninhar um botão em volta do conteúdo.
+ */
 export const Action = styled.button`
   padding: 0;
   border: 0;
@@ -70,5 +88,12 @@ export const Action = styled.button`
   &:hover,
   &:focus-visible {
     color: ${({ theme }) => theme.colors.primaryHover};
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: ${({ theme }) => theme.radii.md};
   }
 `;

@@ -5,6 +5,7 @@ import type {
   PaginatedResidents,
   Resident,
   ResidentFilters,
+  ResidentListItem,
   ResidentPayload,
   ResidentSearchFilters,
   ResidentsSummary,
@@ -15,11 +16,31 @@ const RESOURCE = '/residents';
 /** A report covers every match, so it can take longer than a regular request. */
 const REPORT_TIMEOUT_MS = 60_000;
 
+/** Ceiling accepted by the API on `limit`. */
+const MAX_PAGE_SIZE = 100;
+
 export const residentsApi = {
   async list(filters: ResidentFilters): Promise<PaginatedResidents> {
     const { data } = await httpClient.get<PaginatedResidents>(RESOURCE, { params: filters });
 
     return data;
+  },
+
+  /**
+   * Condomínio inteiro em uma lista só. A paginação existe para a tabela; quem
+   * precisa de todo mundo — como a relação de moradores e telefones — percorre
+   * as páginas restantes, que hoje raramente passam da primeira.
+   */
+  async listAll(): Promise<ResidentListItem[]> {
+    const firstPage = await residentsApi.list({ page: 1, limit: MAX_PAGE_SIZE });
+
+    const otherPages = await Promise.all(
+      Array.from({ length: firstPage.totalPages - 1 }, (_unused, index) =>
+        residentsApi.list({ page: index + 2, limit: MAX_PAGE_SIZE }),
+      ),
+    );
+
+    return [firstPage, ...otherPages].flatMap((page) => page.items);
   },
 
   async summary(): Promise<ResidentsSummary> {

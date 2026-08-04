@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /registro
+Allow: /c/
+
+# Área autenticada e fluxos internos — não indexar
+Disallow: /app
+Disallow: /app/
+Disallow: /login
+
+# Sitemap (ajuste o domínio em produção se for diferente)
+Sitemap: https://condogest.com.br/sitemap.xml

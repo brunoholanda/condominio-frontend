@@ -53,3 +53,52 @@ export const Warning = styled.p`
   line-height: 1.5;
   text-align: center;
 `;
+
+export const FooterLink = styled.p`
+  margin: ${({ theme }) => `${theme.spacing(5)} 0 0`};
+  color: ${({ theme }) => theme.colors.textMuted};
+  font-size: 0.88rem;
+  text-align: center;
+
+  a {
+    color: ${({ theme }) => theme.colors.primary};
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+export const StepIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(6)};
+`;
+
+export const StepDot = styled.span<{ $active?: boolean; $done?: boolean }>`
+  width: ${({ $active }) => ($active ? '22px' : '8px')};
+  height: 8px;
+  border-radius: 999px;
+  background: ${({ theme, $active, $done }) =>
+    $active || $done ? theme.colors.accent : theme.colors.border};
+  transition:
+    width 0.2s ease,
+    background 0.2s ease;
+`;
+
+export const StepLabel = styled.p`
+  margin: 0 0 ${({ theme }) => theme.spacing(5)};
+  color: ${({ theme }) => theme.colors.textMuted};
+  font-size: 0.85rem;
+  text-align: center;
+`;
+
+export const StepActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(3)};
+`;

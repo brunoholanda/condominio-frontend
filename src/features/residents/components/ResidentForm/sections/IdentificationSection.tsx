@@ -4,9 +4,12 @@ import dayjs from 'dayjs';
 import { IdCard } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
+import { PhoneInput } from '@/shared/components/PhoneInput/PhoneInput';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { maskCpf, maskPhone, maskRg, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
-import { BUILDING_HANDOVER_DATE, UNIT_OPTIONS } from '../../../model/condo';
+import { queries } from '@/styles/theme';
+import { buildUnitOptions } from '../../../model/condo';
 import { OCCUPANCY_TYPE_LABELS, OCCUPANCY_TYPES } from '../../../model/resident.types';
 
 const OCCUPANCY_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
@@ -14,14 +17,24 @@ const OCCUPANCY_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
   label: OCCUPANCY_TYPE_LABELS[value],
 }));
 
-export function IdentificationSection() {
+interface IdentificationSectionProps {
+  units: string[];
+  /** Data de entrega do prédio, quando o condomínio informou uma. */
+  buildingHandoverDate?: Dayjs | null;
+}
+
+export function IdentificationSection({ units, buildingHandoverDate }: IdentificationSectionProps) {
   const form = Form.useFormInstance();
+  const isMobile = useMediaQuery(queries.downMd);
   const movedInAt = Form.useWatch<Dayjs | undefined>('movedInAt', form);
+  const unitOptions = buildUnitOptions(units);
   // The shortcut is not a field of its own: it simply reflects the date below.
-  const sinceHandover = Boolean(movedInAt?.isSame(BUILDING_HANDOVER_DATE, 'day'));
+  const sinceHandover = Boolean(
+    buildingHandoverDate && movedInAt?.isSame(buildingHandoverDate, 'day'),
+  );
 
   const handleSinceHandover = (checked: boolean) => {
-    form.setFieldValue('movedInAt', checked ? BUILDING_HANDOVER_DATE : undefined);
+    form.setFieldValue('movedInAt', checked ? buildingHandoverDate : undefined);
 
     // Clearing the date leaves the field pending, not wrong: only the filled
     // date is worth validating right away, to drop an error already on screen.
@@ -45,7 +58,7 @@ export function IdentificationSection() {
           >
             <Select
               showSearch
-              options={UNIT_OPTIONS}
+              options={unitOptions}
               placeholder="Selecione"
               optionFilterProp="label"
               notFoundContent="Unidade inexistente no condomínio"
@@ -59,7 +72,16 @@ export function IdentificationSection() {
             label="Vínculo com a unidade"
             rules={[rules.required('Selecione se o morador é proprietário ou inquilino')]}
           >
-            <Radio.Group options={OCCUPANCY_OPTIONS} optionType="button" buttonStyle="solid" />
+            <Radio.Group
+              options={OCCUPANCY_OPTIONS}
+              optionType="button"
+              buttonStyle="solid"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                width: isMobile ? '100%' : undefined,
+              }}
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -105,7 +127,7 @@ export function IdentificationSection() {
       <Row gutter={16}>
         <Col xs={24} sm={12} md={8}>
           <Form.Item name="landlinePhone" label="Telefone" normalize={maskPhone} rules={[rules.phone()]}>
-            <Input placeholder="(11) 3333-4444" inputMode="tel" />
+            <PhoneInput placeholder="(11) 3333-4444" />
           </Form.Item>
         </Col>
 
@@ -116,7 +138,7 @@ export function IdentificationSection() {
             normalize={maskPhone}
             rules={[rules.required(), rules.phone()]}
           >
-            <Input placeholder="(11) 98888-7777" inputMode="tel" />
+            <PhoneInput />
           </Form.Item>
         </Col>
 
@@ -126,18 +148,20 @@ export function IdentificationSection() {
             label="Quando mudou-se"
             rules={[rules.required()]}
             extra={
-              <Checkbox
-                checked={sinceHandover}
-                onChange={(event) => handleSinceHandover(event.target.checked)}
-              >
-                Desde a entrega do prédio
-              </Checkbox>
+              buildingHandoverDate ? (
+                <Checkbox
+                  checked={sinceHandover}
+                  onChange={(event) => handleSinceHandover(event.target.checked)}
+                >
+                  Desde a entrega do prédio
+                </Checkbox>
+              ) : undefined
             }
           >
             <DatePicker
               format="DD/MM/YYYY"
               placeholder="Selecione a data"
-              minDate={BUILDING_HANDOVER_DATE}
+              minDate={buildingHandoverDate ?? undefined}
               maxDate={dayjs()}
               style={{ width: '100%' }}
             />

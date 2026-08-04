@@ -1,15 +1,17 @@
 import { App, Button, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Eye, FileDown, Pencil, Search, Trash2, UserPlus } from 'lucide-react';
+import { Eye, ExternalLink, FileDown, Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useManagerCondominium } from '@/features/condominiums/components/ManagerLayout';
 import { ApiError } from '@/shared/api/api-error';
 import { DataProtectionNotice } from '@/shared/components/DataProtectionNotice/DataProtectionNotice';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { EDIT_WARNING, EXPORT_WARNING } from '@/shared/privacy/operator-duties';
 import { maskCpf, maskPhone } from '@/shared/utils/masks';
+import { mobileOverlayWidth, mobileTableProps } from '@/shared/utils/mobile-ui';
 import { queries } from '@/styles/theme';
 import { ResidentDetailsDrawer } from '../components/ResidentDetailsDrawer/ResidentDetailsDrawer';
 import { ResidentsSummary } from '../components/ResidentsSummary/ResidentsSummary';
@@ -30,6 +32,7 @@ const OCCUPANCY_FILTER_OPTIONS = OCCUPANCY_TYPES.map((value) => ({
 }));
 
 export function ResidentsListPage() {
+  const condominium = useManagerCondominium();
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const isMobile = useMediaQuery(queries.downMd);
@@ -37,17 +40,18 @@ export function ResidentsListPage() {
   const [viewingId, setViewingId] = useState<string>();
   const [isViewOpen, setIsViewOpen] = useState(false);
 
-  const residentsQuery = useResidentsQuery(filters);
+  const residentsQuery = useResidentsQuery(condominium.id, filters);
   const deleteResident = useDeleteResidentMutation();
   const downloadReport = useResidentsReportMutation();
 
   const total = residentsQuery.data?.total ?? 0;
+  const publicFormUrl = `/c/${condominium.slug}/cadastro`;
 
   const downloadPdf = () => {
     const { search, unit, occupancyType } = filters;
 
     downloadReport.mutate(
-      { search, unit, occupancyType },
+      { condominiumId: condominium.id, filters: { search, unit, occupancyType } },
       {
         onSuccess: () => message.success(`PDF gerado com ${total} cadastro(s).`),
         onError: (error: unknown) =>
@@ -67,7 +71,7 @@ export function ResidentsListPage() {
       content: EXPORT_WARNING,
       okText: 'Baixar PDF',
       cancelText: 'Cancelar',
-      width: 560,
+      width: mobileOverlayWidth(isMobile, 560),
       onOk: downloadPdf,
     });
   };
@@ -89,19 +93,22 @@ export function ResidentsListPage() {
       content: EDIT_WARNING,
       okText: 'Entendi, quero editar',
       cancelText: 'Cancelar',
-      width: 560,
-      onOk: () => void navigate(`/moradores/${resident.id}`),
+      width: mobileOverlayWidth(isMobile, 560),
+      onOk: () => void navigate(`/app/condominios/${condominium.id}/moradores/${resident.id}`),
     });
   };
 
   const handleDelete = (resident: ResidentListItem) => {
-    deleteResident.mutate(resident.id, {
-      onSuccess: () => message.success(`Cadastro de ${resident.fullName} removido.`),
-      onError: (error: unknown) =>
-        message.error(
-          error instanceof ApiError ? error.message : 'Não foi possível remover o cadastro.',
-        ),
-    });
+    deleteResident.mutate(
+      { condominiumId: condominium.id, id: resident.id },
+      {
+        onSuccess: () => message.success(`Cadastro de ${resident.fullName} removido.`),
+        onError: (error: unknown) =>
+          message.error(
+            error instanceof ApiError ? error.message : 'Não foi possível remover o cadastro.',
+          ),
+      },
+    );
   };
 
   const columns: ColumnsType<ResidentListItem> = [
@@ -199,11 +206,10 @@ export function ResidentsListPage() {
               Baixar PDF
             </Button>
             <Button
-              type="primary"
-              icon={<UserPlus size={16} />}
-              onClick={() => void navigate('/cadastro')}
+              icon={<ExternalLink size={16} />}
+              onClick={() => window.open(publicFormUrl, '_blank', 'noreferrer')}
             >
-              Novo cadastro
+              Formulário público
             </Button>
           </Space>
         }
@@ -211,7 +217,7 @@ export function ResidentsListPage() {
 
       <DataProtectionNotice />
 
-      <ResidentsSummary />
+      <ResidentsSummary condominiumId={condominium.id} />
 
       <S.Filters>
         <Input
@@ -241,20 +247,17 @@ export function ResidentsListPage() {
         columns={columns}
         dataSource={residentsQuery.data?.items ?? []}
         loading={residentsQuery.isFetching}
-        size={isMobile ? 'small' : 'middle'}
-        scroll={{ x: 'max-content' }}
-        pagination={{
+        {...mobileTableProps(isMobile, {
           current: filters.page,
           pageSize: filters.limit,
           total,
-          simple: isMobile,
-          showSizeChanger: !isMobile,
           showTotal: isMobile ? undefined : (count) => `${count} cadastro(s)`,
           onChange: (page, limit) => setFilters((current) => ({ ...current, page, limit })),
-        }}
+        })}
       />
 
       <ResidentDetailsDrawer
+        condominiumId={condominium.id}
         residentId={viewingId}
         open={isViewOpen}
         onClose={() => setIsViewOpen(false)}

@@ -1,12 +1,12 @@
 import { Checkbox, Col, Form, Input, Row } from 'antd';
 import dayjs from 'dayjs';
 import { CalendarClock, ShieldCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
 import { PrivacyNoticeLink } from '@/shared/components/PrivacyNotice/PrivacyNotice';
 import { SignaturePad } from '@/shared/components/SignaturePad/SignaturePad';
-import { CONSENT_TEXT } from '@/shared/privacy/privacy-notice';
+import { buildConsentText } from '@/shared/privacy/privacy-notice';
 import { rules } from '@/shared/utils/form-rules';
 
 const STAMP_FORMAT = 'DD/MM/YYYY [às] HH:mm';
@@ -44,9 +44,15 @@ function SignedAtStamp() {
   );
 }
 
-export function ConsentSection() {
+interface ConsentSectionProps {
+  /** Nome do condomínio, usado no texto de autorização; opcional fora do contexto público. */
+  condoName?: string;
+}
+
+export function ConsentSection({ condoName }: ConsentSectionProps) {
   const form = Form.useFormInstance();
   const hasConsented = Form.useWatch('dataUsageConsent', form);
+  const consentText = useMemo(() => buildConsentText(condoName), [condoName]);
 
   return (
     <FormSection
@@ -62,12 +68,12 @@ export function ConsentSection() {
             rules={[rules.accepted('É necessário autorizar o uso dos dados para concluir')]}
             extra={
               <>
-                Leia o <PrivacyNoticeLink /> antes de autorizar. A autorização pode ser revogada a
-                qualquer momento junto à administração.
+                Leia o <PrivacyNoticeLink condoName={condoName} /> antes de autorizar. A
+                autorização pode ser revogada a qualquer momento junto à administração.
               </>
             }
           >
-            <Checkbox>{CONSENT_TEXT}</Checkbox>
+            <Checkbox>{consentText}</Checkbox>
           </Form.Item>
         </Col>
 

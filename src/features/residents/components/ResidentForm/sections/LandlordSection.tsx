@@ -2,6 +2,7 @@ import { Col, Form, Input, Row } from 'antd';
 import { KeyRound } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
+import { PhoneInput } from '@/shared/components/PhoneInput/PhoneInput';
 import { maskPhone, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 
@@ -32,7 +33,7 @@ export function LandlordSection() {
             normalize={maskPhone}
             rules={[rules.required(), rules.phone()]}
           >
-            <Input placeholder="(11) 3333-4444" inputMode="tel" />
+            <PhoneInput placeholder="(11) 3333-4444" />
           </Form.Item>
         </Col>
       </Row>

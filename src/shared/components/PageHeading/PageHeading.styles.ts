@@ -16,7 +16,7 @@ export const Title = styled.h1`
   font-weight: 600;
 
   ${({ theme }) => theme.media.down.md} {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
 `;
 
@@ -25,18 +25,32 @@ export const Description = styled.p`
   max-width: 60ch;
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: 0.9rem;
+
+  ${({ theme }) => theme.media.down.md} {
+    font-size: 0.85rem;
+  }
 `;
 
 export const Actions = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: ${({ theme }) => theme.spacing(2)};
 
   ${({ theme }) => theme.media.down.md} {
     width: 100%;
 
-    > * {
-      flex: 1;
-      height: 40px;
+    > .ant-btn,
+    > .ant-space {
+      flex: 1 1 auto;
+      min-width: min(100%, 140px);
+    }
+
+    > .ant-btn {
+      min-height: 44px;
+    }
+
+    > .ant-space {
+      width: 100%;
     }
   }
 `;

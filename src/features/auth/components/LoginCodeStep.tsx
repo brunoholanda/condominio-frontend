@@ -4,6 +4,8 @@ import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 
 import { ApiError } from '@/shared/api/api-error';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { queries } from '@/styles/theme';
 import { useAuth } from '../hooks/use-auth';
 import type { LoginChallenge } from '../model/auth.types';
 import * as S from './LoginCodeStep.styles';
@@ -52,6 +54,7 @@ function formatDuration(seconds: number): string {
 export function LoginCodeStep({ challenge, onConfirmed, onRestart }: LoginCodeStepProps) {
   const { confirmLogin, resendLoginCode } = useAuth();
   const { message } = App.useApp();
+  const isMobile = useMediaQuery(queries.downMd);
   const [current, setCurrent] = useState(challenge);
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -129,7 +132,7 @@ export function LoginCodeStep({ challenge, onConfirmed, onRestart }: LoginCodeSt
           onChange={(value) => void submit(value)}
           onInput={(values) => setCode(values.join(''))}
           disabled={submitting || expired}
-          size="large"
+          size={isMobile ? 'middle' : 'large'}
           inputMode="numeric"
           aria-label="Código de acesso recebido por e-mail"
         />

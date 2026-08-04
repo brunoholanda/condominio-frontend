@@ -21,7 +21,7 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-wrap: break-word;
   }
@@ -44,6 +44,20 @@ export const GlobalStyles = createGlobalStyle`
     .ant-btn-sm {
       height: 32px;
       padding-inline: ${({ theme }) => theme.spacing(2)};
+    }
+
+    .ant-table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ant-modal {
+      max-width: calc(100vw - 16px);
+      margin: 8px auto;
+    }
+
+    .ant-drawer-content-wrapper {
+      max-width: 100vw;
     }
   }
 `;

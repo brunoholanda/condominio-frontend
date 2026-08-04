@@ -1,6 +1,10 @@
 import { App, Button, Form } from 'antd';
+import type { Dayjs } from 'dayjs';
 import { RotateCcw, Save } from 'lucide-react';
 
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
+import { mobileOverlayWidth } from '@/shared/utils/mobile-ui';
+import { queries } from '@/styles/theme';
 import type { ResidentFormValues } from '../../model/resident-form.types';
 import { emptyResidentFormValues } from '../../model/resident-form.mapper';
 import * as S from './ResidentForm.styles';
@@ -14,6 +18,11 @@ import { PetsSection } from './sections/PetsSection';
 import { VehiclesSection } from './sections/VehiclesSection';
 
 interface ResidentFormProps {
+  /** Unidades existentes no condomínio, para o `Select` da unidade. */
+  units: string[];
+  buildingHandoverDate?: Dayjs | null;
+  /** Nome do condomínio, usado nos textos de privacidade quando disponível. */
+  condoName?: string;
   initialValues?: ResidentFormValues;
   submitting: boolean;
   submitLabel: string;
@@ -21,6 +30,9 @@ interface ResidentFormProps {
 }
 
 export function ResidentForm({
+  units,
+  buildingHandoverDate,
+  condoName,
   initialValues,
   submitting,
   submitLabel,
@@ -28,6 +40,7 @@ export function ResidentForm({
 }: ResidentFormProps) {
   const [form] = Form.useForm<ResidentFormValues>();
   const { modal } = App.useApp();
+  const isMobile = useMediaQuery(queries.downMd);
   const occupancyType = Form.useWatch('occupancyType', form);
 
   /**
@@ -40,7 +53,7 @@ export function ResidentForm({
       title: 'Confirme a unidade do cadastro',
       okText: submitLabel,
       cancelText: 'Revisar',
-      width: 460,
+      width: mobileOverlayWidth(isMobile, 460),
       content: (
         <>
           <S.ConfirmedUnit>{values.unit}</S.ConfirmedUnit>
@@ -74,14 +87,14 @@ export function ResidentForm({
       disabled={submitting}
     >
       <S.Sections>
-        <IdentificationSection />
+        <IdentificationSection units={units} buildingHandoverDate={buildingHandoverDate} />
         <EmergencyContactSection />
         {occupancyType === 'TENANT' ? <LandlordSection /> : null}
         <HouseholdMembersSection />
         <EmployeesSection />
         <VehiclesSection />
         <PetsSection />
-        <ConsentSection />
+        <ConsentSection condoName={condoName} />
       </S.Sections>
 
       <S.Actions>

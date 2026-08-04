@@ -25,12 +25,39 @@ export const Header = styled.header`
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing(4)};
   padding: ${({ theme }) => `${theme.spacing(4)} ${theme.spacing(6)}`};
+  padding-top: max(${({ theme }) => theme.spacing(4)}, env(safe-area-inset-top));
   background: ${({ theme }) => theme.colors.primary};
   box-shadow: ${({ theme }) => theme.shadows.header};
 
   ${({ theme }) => theme.media.down.md} {
+    flex-wrap: nowrap;
     gap: ${({ theme }) => theme.spacing(3)};
     padding: ${({ theme }) => `${theme.spacing(3)} ${theme.spacing(4)}`};
+    padding-top: max(${({ theme }) => theme.spacing(3)}, env(safe-area-inset-top));
+  }
+`;
+
+export const BrandRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  min-width: 0;
+`;
+
+export const MenuButton = styled.button`
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryHover};
   }
 `;
 
@@ -65,6 +92,10 @@ export const BrandSubtitle = styled.span`
   display: block;
   color: ${({ theme }) => theme.colors.accentSoft};
   font-size: 0.8rem;
+
+  ${({ theme }) => theme.media.down.md} {
+    display: none;
+  }
 `;
 
 export const Nav = styled.nav`
@@ -72,10 +103,24 @@ export const Nav = styled.nav`
   flex-wrap: wrap;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
+`;
 
-  ${({ theme }) => theme.media.down.md} {
+export const DrawerNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+
+  a,
+  button {
+    justify-content: flex-start;
     width: 100%;
-    gap: ${({ theme }) => theme.spacing(1)};
+    min-height: 44px;
+    color: ${({ theme }) => theme.colors.text};
+  }
+
+  a.active {
+    background: ${({ theme }) => theme.colors.accentSoft};
+    color: ${({ theme }) => theme.colors.primary};
   }
 `;
 
@@ -140,10 +185,7 @@ export const UserName = styled.span`
   white-space: nowrap;
 
   ${({ theme }) => theme.media.down.md} {
-    max-width: 100%;
-    flex: 1 1 auto;
-    padding-inline: ${({ theme }) => theme.spacing(2)};
-    font-size: 0.8rem;
+    display: none;
   }
 `;
 

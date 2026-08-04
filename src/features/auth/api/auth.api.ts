@@ -5,11 +5,19 @@ import type {
   LoginChallenge,
   LoginPayload,
   LoginResponse,
+  RegisterPayload,
 } from '../model/auth.types';
 
 const RESOURCE = '/auth';
 
 export const authApi = {
+  /** Cria a conta. O acesso ainda depende do login em duas etapas. */
+  async register(payload: RegisterPayload): Promise<AuthenticatedUser> {
+    const { data } = await httpClient.post<AuthenticatedUser>(`${RESOURCE}/register`, payload);
+
+    return data;
+  },
+
   /** Primeira etapa: valida as credenciais e dispara o código por e-mail. */
   async login(payload: LoginPayload): Promise<LoginChallenge> {
     const { data } = await httpClient.post<LoginChallenge>(`${RESOURCE}/login`, payload);

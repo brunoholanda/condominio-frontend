@@ -20,6 +20,13 @@ export function maskCpf(value: string | undefined): string {
     .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
 }
 
+/** Formata CEP brasileiro: 00000-000. */
+export function maskCep(value: string | undefined): string {
+  const digits = onlyDigits(value).slice(0, 8);
+
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
 /** Formats landlines as (11) 3333-4444 and mobiles as (11) 98888-7777. */
 export function maskPhone(value: string | undefined): string {
   const digits = onlyDigits(value).slice(0, 11);

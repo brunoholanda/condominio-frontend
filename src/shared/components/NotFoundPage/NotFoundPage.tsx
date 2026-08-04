@@ -10,8 +10,8 @@ export function NotFoundPage() {
       title="Página não encontrada"
       subTitle="O endereço acessado não existe."
       extra={
-        <Button type="primary" onClick={() => void navigate('/cadastro')}>
-          Ir para o cadastro
+        <Button type="primary" onClick={() => void navigate('/')}>
+          Ir para a página inicial
         </Button>
       }
     />

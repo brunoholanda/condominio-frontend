@@ -1,7 +1,7 @@
 import { App, Button, Form, Input } from 'antd';
 import { LockKeyhole, LogIn, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { ApiError } from '@/shared/api/api-error';
 import { rules } from '@/shared/utils/form-rules';
@@ -22,7 +22,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [challenge, setChallenge] = useState<LoginChallenge | null>(null);
 
-  const redirectTo = (location.state as LocationState | null)?.from ?? '/moradores';
+  const redirectTo = (location.state as LocationState | null)?.from ?? '/app';
 
   if (isBootstrapping) {
     return null;
@@ -114,6 +114,12 @@ export function LoginPage() {
               Entrar
             </Button>
           </Form>
+        )}
+
+        {challenge ? null : (
+          <S.FooterLink>
+            Ainda não tem conta? <Link to="/registro">Criar conta grátis</Link>
+          </S.FooterLink>
         )}
 
         <S.Warning>

@@ -2,6 +2,7 @@
   "name": "@condominio/frontend",
   "private": true,
   "version": "1.0.0",
+  "description": "SPA SaaS de gestão de condomínios (CondoGest)",
   "type": "module",
   "scripts": {
     "dev": "vite",

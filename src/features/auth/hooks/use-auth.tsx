@@ -31,6 +31,8 @@ interface AuthContextValue {
   resendLoginCode: (challengeId: string) => Promise<LoginChallenge>;
   /** Registra o CPF de responsabilidade do operador e atualiza a sessão. */
   identify: (cpf: string) => Promise<void>;
+  /** Recarrega o usuário autenticado (ex.: após webhook Stripe). */
+  refreshSession: () => Promise<void>;
   logout: () => void;
 }
 
@@ -79,6 +81,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     },
     [accessToken],
   );
+
+  const refreshSession = useCallback(async () => {
+    if (!accessToken) {
+      return;
+    }
+
+    const freshUser = await authApi.me();
+    authSessionStore.write({ accessToken, user: freshUser });
+    setUser(freshUser);
+  }, [accessToken]);
 
   useEffect(() => {
     setUnauthorizedHandler(logout);
@@ -134,6 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       confirmLogin,
       resendLoginCode,
       identify,
+      refreshSession,
       logout,
     };
   }, [
@@ -143,6 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isBootstrapping,
     login,
     logout,
+    refreshSession,
     resendLoginCode,
     user,
   ]);

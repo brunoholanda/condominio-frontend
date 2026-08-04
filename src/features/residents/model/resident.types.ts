@@ -99,6 +99,9 @@ export interface ResidentsSummary {
   pendingUnits: number;
   /** Quais unidades ainda não preencheram, em ordem. */
   pendingUnitNumbers: string[];
+  vacantUnits: number;
+  /** Unidades sinalizadas como desocupadas no momento. */
+  vacantUnitNumbers: string[];
   totalPeople: number;
 }
 

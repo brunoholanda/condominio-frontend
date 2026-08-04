@@ -37,7 +37,11 @@ httpClient.interceptors.response.use(
     const requestUrl = axios.isAxiosError(error) ? (error.config?.url ?? '') : '';
 
     // A failed login must not wipe a session that might already exist.
-    if (apiError.status === 401 && !requestUrl.includes('/auth/login')) {
+    if (
+      apiError.status === 401 &&
+      !requestUrl.includes('/auth/login') &&
+      !requestUrl.includes('/staff/')
+    ) {
       onUnauthorized?.();
     }
 

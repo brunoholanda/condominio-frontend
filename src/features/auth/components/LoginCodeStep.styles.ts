@@ -11,6 +11,26 @@ export const CodeField = styled.div`
   flex-direction: column;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
+  width: 100%;
+  overflow-x: auto;
+
+  .ant-otp {
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  ${({ theme }) => theme.media.down.sm} {
+    .ant-otp {
+      gap: 4px;
+    }
+
+    .ant-otp-input {
+      width: 2.4rem !important;
+      min-width: 2.4rem;
+      height: 2.4rem;
+      font-size: 1rem;
+    }
+  }
 `;
 
 export const Countdown = styled.p<{ $expired: boolean }>`

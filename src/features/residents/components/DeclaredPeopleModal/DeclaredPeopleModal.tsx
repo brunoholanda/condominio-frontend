@@ -2,7 +2,10 @@ import { Input, Modal, Result, Skeleton } from 'antd';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { maskPhone } from '@/shared/utils/masks';
+import { mobileOverlayWidth } from '@/shared/utils/mobile-ui';
+import { queries } from '@/styles/theme';
 import { useAllResidentsQuery } from '../../hooks/use-residents';
 import type { ResidentListItem } from '../../model/resident.types';
 import { OCCUPANCY_TYPE_LABELS } from '../../model/resident.types';
@@ -52,13 +55,15 @@ function normalize(value: string): string {
 }
 
 interface DeclaredPeopleModalProps {
+  condominiumId: string;
   open: boolean;
   onClose: () => void;
 }
 
 /** Quem mora no condomínio e por qual telefone falar com a unidade. */
-export function DeclaredPeopleModal({ open, onClose }: DeclaredPeopleModalProps) {
-  const { data, isLoading, isError } = useAllResidentsQuery(open);
+export function DeclaredPeopleModal({ condominiumId, open, onClose }: DeclaredPeopleModalProps) {
+  const { data, isLoading, isError } = useAllResidentsQuery(condominiumId, open);
+  const isMobile = useMediaQuery(queries.downMd);
   const [search, setSearch] = useState('');
 
   const people = useMemo(() => toDeclaredPeople(data ?? []), [data]);
@@ -80,7 +85,7 @@ export function DeclaredPeopleModal({ open, onClose }: DeclaredPeopleModalProps)
       onOk={onClose}
       okText="Fechar"
       cancelButtonProps={{ style: { display: 'none' } }}
-      width={640}
+      width={mobileOverlayWidth(isMobile, 640)}
       title="Moradores declarados"
     >
       <S.Intro>

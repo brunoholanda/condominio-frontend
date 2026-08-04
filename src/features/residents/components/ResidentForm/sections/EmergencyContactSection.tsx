@@ -2,6 +2,7 @@ import { Col, Form, Input, Row } from 'antd';
 import { LifeBuoy } from 'lucide-react';
 
 import { FormSection } from '@/shared/components/FormSection/FormSection';
+import { PhoneInput } from '@/shared/components/PhoneInput/PhoneInput';
 import { maskPhone, upperCase } from '@/shared/utils/masks';
 import { rules } from '@/shared/utils/form-rules';
 
@@ -31,7 +32,7 @@ export function EmergencyContactSection() {
             normalize={maskPhone}
             rules={[rules.required(), rules.phone()]}
           >
-            <Input placeholder="(11) 98888-7777" inputMode="tel" />
+            <PhoneInput />
           </Form.Item>
         </Col>
       </Row>

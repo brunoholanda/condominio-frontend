@@ -39,9 +39,13 @@ function SummaryCard({ icon, label, value, note, actionLabel, onClick }: CardPro
   );
 }
 
+interface ResidentsSummaryProps {
+  condominiumId: string;
+}
+
 /** Adhesion panel: how many units already answered the form and how many people they declared. */
-export function ResidentsSummary() {
-  const { data, isLoading } = useResidentsSummaryQuery();
+export function ResidentsSummary({ condominiumId }: ResidentsSummaryProps) {
+  const { data, isLoading } = useResidentsSummaryQuery(condominiumId);
   const [showPending, setShowPending] = useState(false);
   const [showPeople, setShowPeople] = useState(false);
 
@@ -55,7 +59,7 @@ export function ResidentsSummary() {
           icon={<Building2 size={20} />}
           label="Unidades no condomínio"
           value={isLoading ? LOADING : data?.totalUnits}
-          note="17 apartamentos em cada um dos 4 andares"
+          note="Unidades cadastradas no condomínio"
         />
         <SummaryCard
           icon={<ClipboardCheck size={20} />}
@@ -64,7 +68,9 @@ export function ResidentsSummary() {
           note={
             isLoading
               ? 'Carregando...'
-              : `${percentage}% das unidades · faltam ${data?.pendingUnits ?? 0}`
+              : `${percentage}% das unidades · faltam ${data?.pendingUnits ?? 0}${
+                  (data?.vacantUnits ?? 0) > 0 ? ` · ${data?.vacantUnits} desocupada(s)` : ''
+                }`
           }
           actionLabel="Ver unidades pendentes"
           onClick={data ? () => setShowPending(true) : undefined}
@@ -81,12 +87,18 @@ export function ResidentsSummary() {
 
       <PendingUnitsModal
         open={showPending}
+        condominiumId={condominiumId}
         units={data?.pendingUnitNumbers ?? []}
+        vacantUnits={data?.vacantUnitNumbers ?? []}
         totalUnits={data?.totalUnits ?? 0}
         onClose={() => setShowPending(false)}
       />
 
-      <DeclaredPeopleModal open={showPeople} onClose={() => setShowPeople(false)} />
+      <DeclaredPeopleModal
+        condominiumId={condominiumId}
+        open={showPeople}
+        onClose={() => setShowPeople(false)}
+      />
     </>
   );
 }

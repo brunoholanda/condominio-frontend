@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 import { ApiError } from '@/shared/api/api-error';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import {
   OPERATOR_CPF_NOTICE,
   OPERATOR_DUTIES,
@@ -13,6 +14,8 @@ import {
 } from '@/shared/privacy/operator-duties';
 import { rules } from '@/shared/utils/form-rules';
 import { maskCpf } from '@/shared/utils/masks';
+import { mobileOverlayWidth } from '@/shared/utils/mobile-ui';
+import { queries } from '@/styles/theme';
 import { useAuth } from '../hooks/use-auth';
 import { operatorTermsStore } from '../model/operator-terms.store';
 import * as S from './OperatorTermsGate.styles';
@@ -34,6 +37,7 @@ interface TermsFormValues {
 export function OperatorTermsGate({ children }: OperatorTermsGateProps) {
   const { session, identify, logout } = useAuth();
   const { message } = App.useApp();
+  const isMobile = useMediaQuery(queries.downMd);
   const [form] = Form.useForm<TermsFormValues>();
   const userId = session?.user.id ?? '';
   const needsCpf = session !== null && !session.user.cpf;
@@ -80,7 +84,7 @@ export function OperatorTermsGate({ children }: OperatorTermsGateProps) {
       closable={false}
       maskClosable={false}
       keyboard={false}
-      width={640}
+      width={mobileOverlayWidth(isMobile, 640)}
       title={OPERATOR_TERMS_TITLE}
       footer={[
         <Button key="logout" disabled={submitting} onClick={logout}>

@@ -1,37 +1,41 @@
-import dayjs from 'dayjs';
-
-const FLOORS = [1, 2, 3, 4] as const;
-const APARTMENTS_PER_FLOOR = 17;
-
-/** The condo has 68 apartments: 101–117, 201–217, 301–317 and 401–417. */
-const CONDO_UNITS = FLOORS.flatMap((floor) =>
-  Array.from(
-    { length: APARTMENTS_PER_FLOOR },
-    (_value, index) => `${floor}${String(index + 1).padStart(2, '0')}`,
-  ),
-);
-
-/** Grouped by floor so a list of 68 options stays easy to scan. */
-export const UNIT_OPTIONS = FLOORS.map((floor) => ({
-  label: `${floor}º andar`,
-  options: CONDO_UNITS.filter((unit) => unit.startsWith(String(floor))).map((unit) => ({
-    label: unit,
-    value: unit,
-  })),
-}));
-
 export interface UnitsByFloor {
-  floor: number;
+  /** Prefixo comum às unidades do grupo (ex.: "1" para 101–117) ou um rótulo genérico. */
+  floor: string;
   units: string[];
+}
+
+const FLOOR_PATTERN = /^(\d+)\d{2}$/;
+const OTHER_UNITS_LABEL = 'Outras unidades';
+
+/** Unidades como "101" viram andar "1"; o que não seguir o padrão cai num grupo só. */
+function floorKeyOf(unit: string): string {
+  const match = FLOOR_PATTERN.exec(unit.trim());
+
+  return match?.[1] ?? OTHER_UNITS_LABEL;
+}
+
+function sortUnits(units: readonly string[]): string[] {
+  return units.toSorted((first, second) => first.localeCompare(second, 'pt-BR', { numeric: true }));
 }
 
 /** Quebra uma lista de unidades por andar, pulando andares sem nenhuma. */
 export function groupUnitsByFloor(units: readonly string[]): UnitsByFloor[] {
-  return FLOORS.map((floor) => ({
-    floor,
-    units: units.filter((unit) => unit.startsWith(String(floor))),
-  })).filter((group) => group.units.length > 0);
+  const groups = new Map<string, string[]>();
+
+  for (const unit of units) {
+    const key = floorKeyOf(unit);
+    groups.set(key, [...(groups.get(key) ?? []), unit]);
+  }
+
+  return [...groups.entries()]
+    .toSorted(([first], [second]) => first.localeCompare(second, 'pt-BR', { numeric: true }))
+    .map(([floor, floorUnits]) => ({ floor, units: sortUnits(floorUnits) }));
 }
 
-/** When the building was handed over: the move-in date of the first residents. */
-export const BUILDING_HANDOVER_DATE = dayjs('2018-04-01');
+/** Opções agrupadas do `Select` de unidades, prontas para qualquer catálogo do condomínio. */
+export function buildUnitOptions(units: readonly string[]) {
+  return groupUnitsByFloor(units).map(({ floor, units: floorUnits }) => ({
+    label: /^\d+$/.test(floor) ? `${floor}º andar` : floor,
+    options: floorUnits.map((unit) => ({ label: unit, value: unit })),
+  }));
+}

@@ -229,6 +229,7 @@ function ResidentDetails({ resident }: { resident: Resident }) {
 }
 
 interface ResidentDetailsDrawerProps {
+  condominiumId: string;
   /** Mantido enquanto o painel fecha, para o conteúdo não sumir na animação. */
   residentId: string | undefined;
   open: boolean;
@@ -238,13 +239,14 @@ interface ResidentDetailsDrawerProps {
 
 /** Consulta da ficha inteira sem campos editáveis, para quem só precisa ler. */
 export function ResidentDetailsDrawer({
+  condominiumId,
   residentId,
   open,
   onClose,
   onEdit,
 }: ResidentDetailsDrawerProps) {
   const isMobile = useMediaQuery(queries.downMd);
-  const residentQuery = useResidentQuery(residentId);
+  const residentQuery = useResidentQuery(condominiumId, residentId);
   const resident = residentQuery.data;
 
   return (
@@ -252,6 +254,8 @@ export function ResidentDetailsDrawer({
       open={open}
       onClose={onClose}
       loading={residentQuery.isLoading}
+      placement={isMobile ? 'bottom' : 'right'}
+      height={isMobile ? '90vh' : undefined}
       width={isMobile ? '100%' : 640}
       styles={{ body: { padding: isMobile ? 16 : 24 } }}
       title={resident ? `Unidade ${resident.unit} · ${resident.fullName}` : 'Cadastro do morador'}

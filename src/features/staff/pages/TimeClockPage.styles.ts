@@ -28,7 +28,7 @@ export const Subtitle = styled.p`
 
 export const Card = styled.div`
   background: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.radius.lg};
+  border-radius: ${({ theme }) => theme.radii.lg};
   border: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ theme }) => theme.spacing(3)};
   box-shadow: 0 10px 30px rgba(20, 40, 30, 0.06);
@@ -55,7 +55,7 @@ export const LocationBox = styled.div<{ $ok: boolean }>`
   gap: 10px;
   padding: 12px;
   margin-bottom: 16px;
-  border-radius: ${({ theme }) => theme.radius.md};
+  border-radius: ${({ theme }) => theme.radii.md};
   background: ${({ $ok }) => ($ok ? '#eaf6ee' : '#fff4e5')};
   border: 1px solid ${({ $ok }) => ($ok ? '#b7dfc4' : '#f0d2a0')};
 
@@ -68,7 +68,7 @@ export const LocationBox = styled.div<{ $ok: boolean }>`
 export const CameraArea = styled.div`
   position: relative;
   overflow: hidden;
-  border-radius: ${({ theme }) => theme.radius.md};
+  border-radius: ${({ theme }) => theme.radii.md};
   background: #111;
   aspect-ratio: 3 / 4;
 

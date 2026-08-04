@@ -14,9 +14,12 @@ import * as S from './MyCondominiumsPage.styles';
 
 function condoInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return 'C';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+  const first = parts[0];
+  const second = parts[1];
+
+  if (!first) return 'C';
+  if (!second) return first.slice(0, 2).toUpperCase();
+  return `${first[0] ?? ''}${second[0] ?? ''}`.toUpperCase();
 }
 
 function firstName(fullName: string | undefined): string {
@@ -291,24 +294,29 @@ export function MyCondominiumsPage() {
 
             <S.Footnote>
               Hub público em <code>/c/slug</code>
-              {condominiums[0] ? (
-                <>
-                  . Ex.:{' '}
-                  <Link
-                    to={`/c/${condominiums[0].slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(event) => {
-                      if (event.metaKey || event.ctrlKey) return;
-                      event.preventDefault();
-                      void copyPublicHint(condominiums[0].slug);
-                    }}
-                  >
-                    /c/{condominiums[0].slug}
-                  </Link>{' '}
-                  (clique para copiar)
-                </>
-              ) : null}
+              {(() => {
+                const sample = condominiums[0];
+                if (!sample) return null;
+
+                return (
+                  <>
+                    . Ex.:{' '}
+                    <Link
+                      to={`/c/${sample.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(event) => {
+                        if (event.metaKey || event.ctrlKey) return;
+                        event.preventDefault();
+                        void copyPublicHint(sample.slug);
+                      }}
+                    >
+                      /c/{sample.slug}
+                    </Link>{' '}
+                    (clique para copiar)
+                  </>
+                );
+              })()}
               .
             </S.Footnote>
           </S.Section>

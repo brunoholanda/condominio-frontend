@@ -84,7 +84,8 @@ function parseBenefits(text: string | undefined): { name: string; value?: number
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [name, valueRaw] = line.split(':').map((part) => part.trim());
+      const [namePart, valueRaw] = line.split(':').map((part) => part.trim());
+      const name = namePart ?? line;
       const value = valueRaw ? Number(valueRaw.replace(',', '.')) : null;
 
       return {

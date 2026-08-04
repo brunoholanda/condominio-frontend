@@ -29,16 +29,18 @@ import * as S from './MyAccountPage.styles';
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
+  const first = parts[0];
+  const last = parts[parts.length - 1];
 
-  if (parts.length === 0) {
+  if (!first) {
     return '?';
   }
 
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
+  if (!last || parts.length === 1) {
+    return first.slice(0, 2).toUpperCase();
   }
 
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
 }
 
 /** Assinatura da conta (Stripe) + resumo dos chamados de suporte. */
@@ -82,7 +84,7 @@ export function MyAccountPage() {
     return null;
   }
 
-  const plan = findPlan(user.plan) ?? PLANS[0];
+  const plan = findPlan(user.plan) ?? PLANS[0]!;
   const daysLeft = trialDaysRemaining(user.trialEndsAt);
   const isTrialing = user.subscriptionStatus === 'TRIALING';
   const trialRatio = isTrialing ? Math.min(1, Math.max(0, 1 - daysLeft / TRIAL_DAYS)) : 0;

@@ -19,15 +19,11 @@ export interface AddressLocationFormValues extends CondoAddressParts {
 }
 
 interface AddressLocationFieldsProps {
-  form: FormInstance<AddressLocationFormValues & Record<string, unknown>>;
+  form: FormInstance;
   disabled?: boolean;
 }
 
-function applySuggestion(
-  form: FormInstance<AddressLocationFormValues & Record<string, unknown>>,
-  item: GeocodeSuggestion,
-  keepNumber?: string,
-) {
+function applySuggestion(form: FormInstance, item: GeocodeSuggestion, keepNumber?: string) {
   const parts: CondoAddressParts = {
     street: item.street,
     number: item.number || keepNumber,
@@ -45,9 +41,7 @@ function applySuggestion(
   });
 }
 
-function syncComposedAddress(
-  form: FormInstance<AddressLocationFormValues & Record<string, unknown>>,
-) {
+function syncComposedAddress(form: FormInstance) {
   const parts = form.getFieldsValue([
     'street',
     'number',

@@ -10,7 +10,7 @@ import {
   QrCode,
   UserPlus,
 } from 'lucide-react';
-import type { ComponentType } from 'react';
+import type { CSSProperties, ComponentType } from 'react';
 
 import { ApiError } from '@/shared/api/api-error';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
@@ -32,7 +32,10 @@ import {
 } from '../model/public-qr.types';
 import * as S from './PublicQrCodesPage.styles';
 
-const HUB_LINK_ICONS: Record<PublicHubLink, ComponentType<{ size?: number }>> = {
+const HUB_LINK_ICONS: Record<
+  PublicHubLink,
+  ComponentType<{ size?: number; style?: CSSProperties }>
+> = {
   cadastro: UserPlus,
   documentos: FileText,
   transparencia: Landmark,

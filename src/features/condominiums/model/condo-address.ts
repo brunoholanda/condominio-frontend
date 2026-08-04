@@ -74,14 +74,15 @@ export function parseCondoAddress(raw?: string | null): CondoAddressParts {
   let city: string | undefined;
   let state: string | undefined;
 
-  if (segments.length >= 1) {
-    const [streetPart, ...restNum] = segments[0].split(',').map((s) => s.trim());
+  const firstSeg = segments[0];
+  if (firstSeg) {
+    const [streetPart, ...restNum] = firstSeg.split(',').map((s) => s.trim());
     street = streetPart || undefined;
     number = restNum.join(', ') || undefined;
   }
 
-  if (segments.length >= 2) {
-    const citySeg = segments[1];
+  const citySeg = segments[1];
+  if (citySeg) {
     const ufMatch = citySeg.match(/\b([A-Z]{2})\b\s*$/);
     state = ufMatch?.[1];
     const beforeUf = state ? citySeg.replace(/\s*-\s*[A-Z]{2}\s*$/, '').trim() : citySeg;

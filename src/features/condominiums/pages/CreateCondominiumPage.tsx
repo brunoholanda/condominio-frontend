@@ -117,7 +117,9 @@ export function CreateCondominiumPage() {
   };
 
   const goNext = async () => {
-    const fields = [...STEPS[step].fields];
+    const currentStep = STEPS[step];
+    if (!currentStep) return;
+    const fields = [...currentStep.fields];
 
     try {
       if (fields.length > 0) {

@@ -144,7 +144,7 @@ export function PlatformAccountsPage() {
     const action = active ? 'ativar' : 'desativar';
 
     modal.confirm({
-      title: `${action[0].toUpperCase()}${action.slice(1)} a conta de ${account.name}?`,
+      title: `${action.charAt(0).toUpperCase()}${action.slice(1)} a conta de ${account.name}?`,
       content: active
         ? 'A pessoa voltará a poder entrar na plataforma.'
         : 'A pessoa não conseguirá fazer login enquanto a conta estiver desativada.',

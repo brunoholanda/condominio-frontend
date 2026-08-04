@@ -186,7 +186,7 @@ export function RegisterPage() {
                 Criar conta
               </Button>
               <Button
-                type="button"
+                htmlType="button"
                 icon={<ArrowLeft size={16} />}
                 block
                 size="large"

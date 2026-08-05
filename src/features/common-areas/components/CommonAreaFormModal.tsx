@@ -13,7 +13,7 @@ interface CommonAreaFormValues {
   name: string;
   description?: string;
   rules?: string;
-  cost: number;
+  cost: number | null;
   capacity: number;
   active: boolean;
   autoApprove: boolean;
@@ -31,7 +31,7 @@ interface CommonAreaFormModalProps {
 
 const DEFAULT_VALUES: CommonAreaFormValues = {
   name: '',
-  cost: 0,
+  cost: null,
   capacity: 10,
   active: true,
   autoApprove: false,
@@ -76,7 +76,7 @@ export function CommonAreaFormModal({
       name: values.name.trim(),
       description: values.description?.trim() || null,
       rules: values.rules?.trim() || null,
-      costCents: reaisToCents(values.cost),
+      costCents: reaisToCents(values.cost ?? 0),
       capacity: values.capacity,
       active: values.active,
       autoApprove: values.autoApprove,
@@ -94,6 +94,7 @@ export function CommonAreaFormModal({
       okText="Salvar"
       cancelText="Cancelar"
       confirmLoading={submitting}
+      destroyOnHidden
       width={mobileOverlayWidth(isMobile, 620)}
     >
       <Form form={form} layout="vertical" requiredMark={false} onFinish={handleFinish}>
@@ -109,7 +110,11 @@ export function CommonAreaFormModal({
           <Input.TextArea rows={3} placeholder="Uso até as 22h. Silêncio após esse horário." />
         </Form.Item>
 
-        <Form.Item name="cost" label="Custo da reserva (R$)">
+        <Form.Item
+          name="cost"
+          label="Custo da reserva (R$)"
+          extra="Deixe em branco ou 0 para reserva gratuita."
+        >
           <MoneyInput min={0} />
         </Form.Item>
 

@@ -17,6 +17,13 @@ export const Page = styled.div`
   animation: ${rise} 0.4s ease both;
 `;
 
+/** Conteúdo do wizard dentro do Modal (desktop). */
+export const ModalBody = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(5)};
+  padding-top: ${({ theme }) => theme.spacing(1)};
+`;
+
 export const Card = styled.div`
   display: grid;
   gap: ${({ theme }) => theme.spacing(6)};

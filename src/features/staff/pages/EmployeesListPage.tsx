@@ -1,25 +1,40 @@
-import { App, Button, Popconfirm, Space, Table, Tag } from 'antd';
+import { App, Button, Modal, Popconfirm, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { MapPin, Pencil, Plus, Trash2, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useManagerCondominium } from '@/features/condominiums/components/ManagerLayout';
 import { ApiError } from '@/shared/api/api-error';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
+import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { maskCpf, maskPhone } from '@/shared/utils/masks';
+import { queries } from '@/styles/theme';
 import { useDeleteEmployeeMutation, useEmployeesQuery } from '../hooks/use-staff';
 import type { EmployeeListItem } from '../model/staff.types';
+import { EmployeeForm } from './EmployeeFormPage';
 import * as S from './EmployeesListPage.styles';
 
 export function EmployeesListPage() {
   const condominium = useManagerCondominium();
   const navigate = useNavigate();
   const { message } = App.useApp();
+  const isMobile = useMediaQuery(queries.downMd);
+  const [createOpen, setCreateOpen] = useState(false);
   const employeesQuery = useEmployeesQuery(condominium.id);
   const deleteEmployee = useDeleteEmployeeMutation(condominium.id);
   const hasLocation = Boolean(
     condominium.address && condominium.latitude != null && condominium.longitude != null,
   );
+
+  const openCreate = () => {
+    if (isMobile) {
+      void navigate(`/app/condominios/${condominium.id}/funcionarios/novo`);
+      return;
+    }
+
+    setCreateOpen(true);
+  };
 
   const columns: ColumnsType<EmployeeListItem> = [
     {
@@ -100,7 +115,7 @@ export function EmployeesListPage() {
             type="primary"
             icon={<Plus size={16} />}
             disabled={!hasLocation}
-            onClick={() => void navigate(`/app/condominios/${condominium.id}/funcionarios/novo`)}
+            onClick={openCreate}
           >
             Novo funcionário
           </Button>
@@ -129,6 +144,22 @@ export function EmployeesListPage() {
           pagination={{ pageSize: 15 }}
         />
       </S.Card>
+
+      <Modal
+        open={createOpen}
+        title="Novo funcionário"
+        onCancel={() => setCreateOpen(false)}
+        footer={null}
+        width={760}
+        destroyOnHidden
+        styles={{ body: { maxHeight: 'min(78vh, 720px)', overflowY: 'auto' } }}
+      >
+        <EmployeeForm
+          layout="modal"
+          onCancel={() => setCreateOpen(false)}
+          onCreated={() => setCreateOpen(false)}
+        />
+      </Modal>
     </>
   );
 }

@@ -29,8 +29,8 @@ export function formatReaisMask(value: string | number | undefined | null): stri
 }
 
 /**
- * Interpreta texto mascarado de moeda BR ("R$ 1.234,56", "1234,56", "123456")
- * como número em reais. Digitação só com dígitos trata como centavos.
+ * Interpreta texto mascarado de moeda BR ("R$ 1.234,56", "1234,56", "1500")
+ * como número em reais. Dígitos sem vírgula = reais inteiros (1500 → 1500).
  */
 export function parseReaisMask(display: string | undefined | null): number {
   if (!display) {
@@ -43,7 +43,7 @@ export function parseReaisMask(display: string | undefined | null): number {
     return Number.NaN;
   }
 
-  // Já no formato BR com vírgula decimal.
+  // Formato BR: ponto como milhar, vírgula como decimal.
   if (cleaned.includes(',')) {
     const normalized = cleaned.replace(/\./g, '').replace(',', '.');
     const num = Number(normalized);
@@ -51,14 +51,16 @@ export function parseReaisMask(display: string | undefined | null): number {
     return Number.isFinite(num) ? num : Number.NaN;
   }
 
-  // Só dígitos: interpreta como centavos (1 → 0,01; 1234 → 12,34).
-  const digits = cleaned.replace(/\D/g, '');
+  // Sem vírgula: remove milhares e interpreta o restante como reais.
+  const digits = cleaned.replace(/\./g, '').replace(/\D/g, '');
 
   if (!digits) {
     return Number.NaN;
   }
 
-  return Number(digits) / 100;
+  const num = Number(digits);
+
+  return Number.isFinite(num) ? num : Number.NaN;
 }
 
 /** Converte reais (podendo vir com vírgula) para centavos inteiros. */

@@ -73,8 +73,12 @@ export function CreateCondominiumPage() {
   const condominiumsQuery = useMyCondominiumsQuery();
   const plan = session?.user.plan ?? 'lite';
   const isSystemOwner = Boolean(session?.user.isSystemOwner);
-  const ownedCount =
-    condominiumsQuery.data?.filter((condo) => condo.myRole === 'OWNER').length ?? 0;
+  const condominiums = condominiumsQuery.data ?? [];
+  const ownedCount = condominiums.filter((condo) => condo.myRole === 'OWNER').length;
+  const isDoormanWithoutOwnership =
+    !isSystemOwner &&
+    ownedCount === 0 &&
+    condominiums.some((condo) => condo.myRole === 'DOORMAN');
 
   // preserve: true — steps unmount Form.Items; without this, review sees empty values
   const watched = Form.useWatch([], { form, preserve: true });
@@ -101,15 +105,32 @@ export function CreateCondominiumPage() {
   }, [watched]);
 
   useEffect(() => {
+    if (condominiumsQuery.isLoading) {
+      return;
+    }
+
+    if (isDoormanWithoutOwnership) {
+      message.info('Contas de porteiro não podem criar condomínios.');
+      void navigate('/app', { replace: true });
+      return;
+    }
+
     if (
       !isSystemOwner &&
       (plan === 'lite' || plan === 'prime') &&
-      ownedCount >= 1 &&
-      !condominiumsQuery.isLoading
+      ownedCount >= 1
     ) {
       setCondoUpgradeOpen(true);
     }
-  }, [condominiumsQuery.isLoading, isSystemOwner, ownedCount, plan]);
+  }, [
+    condominiumsQuery.isLoading,
+    isDoormanWithoutOwnership,
+    isSystemOwner,
+    message,
+    navigate,
+    ownedCount,
+    plan,
+  ]);
 
   const handleNameChange = (name: string) => {
     if (!slugTouched) {
@@ -203,6 +224,12 @@ export function CreateCondominiumPage() {
 
           if (error instanceof ApiError && error.code === 'PLAN_CONDO_LIMIT') {
             setCondoUpgradeOpen(true);
+            return;
+          }
+
+          if (error instanceof ApiError && error.code === 'DOORMAN_CANNOT_CREATE_CONDO') {
+            message.error(error.message);
+            void navigate('/app', { replace: true });
             return;
           }
 

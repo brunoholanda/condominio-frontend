@@ -41,7 +41,10 @@ export const staffApi = {
     return data;
   },
 
-  async create(condominiumId: string, payload: EmployeePayload & { pin: string }): Promise<Employee> {
+  async create(
+    condominiumId: string,
+    payload: EmployeePayload & { pin?: string },
+  ): Promise<Employee> {
     const { data } = await httpClient.post<Employee>(employeesPath(condominiumId), payload);
 
     return data;
@@ -183,6 +186,99 @@ export const staffApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+
+    return data;
+  },
+
+  async listStaffVisitors(
+    slug: string,
+    accessToken: string,
+    params?: { status?: string },
+  ): Promise<import('@/features/visitors/model/visitor.types').VisitorPass[]> {
+    const { data } = await httpClient.get(`/c/${slug}/staff/visitors`, {
+      params,
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return data;
+  },
+
+  async createStaffVisitor(
+    slug: string,
+    accessToken: string,
+    payload: import('@/features/visitors/model/visitor.types').CreateVisitorPassPayload,
+  ): Promise<import('@/features/visitors/model/visitor.types').VisitorPass> {
+    const { data } = await httpClient.post(`/c/${slug}/staff/visitors`, payload, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return data;
+  },
+
+  async checkInStaffVisitor(
+    slug: string,
+    accessToken: string,
+    passId: string,
+  ): Promise<import('@/features/visitors/model/visitor.types').VisitorPass> {
+    const { data } = await httpClient.post(
+      `/c/${slug}/staff/visitors/${passId}/check-in`,
+      {},
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    return data;
+  },
+
+  async listStaffPackages(
+    slug: string,
+    accessToken: string,
+    params?: { status?: string; page?: number; limit?: number },
+  ): Promise<import('@/features/deliveries/model/delivery.types').PaginatedPackages> {
+    const { data } = await httpClient.get(`/c/${slug}/staff/packages`, {
+      params,
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return data;
+  },
+
+  async createStaffPackage(
+    slug: string,
+    accessToken: string,
+    payload: import('@/features/deliveries/model/delivery.types').CreatePackagePayload,
+  ): Promise<import('@/features/deliveries/model/delivery.types').CondoPackage> {
+    const { data } = await httpClient.post(`/c/${slug}/staff/packages`, payload, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return data;
+  },
+
+  async deliverStaffPackage(
+    slug: string,
+    accessToken: string,
+    packageId: string,
+    payload: { recipientName: string; signature: string },
+  ): Promise<import('@/features/deliveries/model/delivery.types').CondoPackage> {
+    const { data } = await httpClient.post(
+      `/c/${slug}/staff/packages/${packageId}/deliver`,
+      payload,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    return data;
+  },
+
+  async createStaffSigningSession(
+    slug: string,
+    accessToken: string,
+    packageId: string,
+  ): Promise<import('@/features/deliveries/model/delivery.types').SigningSession> {
+    const { data } = await httpClient.post(
+      `/c/${slug}/staff/packages/${packageId}/signing-session`,
+      {},
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
 
     return data;
   },

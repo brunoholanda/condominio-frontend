@@ -19,15 +19,15 @@ import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { queries } from '@/styles/theme';
 import * as S from './AppLayout.styles';
 
-/** Formulário público de cadastro da unidade / ponto — visitantes só veem a marca no header. */
+/** Formulário público de cadastro / portal do funcionário — visitantes só veem a marca no header. */
 function isPublicServicePath(pathname: string): boolean {
   return (
     pathname === '/cadastro' ||
     Boolean(matchPath({ path: '/c/:slug/cadastro', end: true }, pathname)) ||
+    Boolean(matchPath({ path: '/c/:slug/portal', end: true }, pathname)) ||
     Boolean(matchPath({ path: '/c/:slug/ponto', end: true }, pathname))
   );
 }
-
 export function AppLayout() {
   const { isAuthenticated, session, logout } = useAuth();
   const isMobile = useMediaQuery(queries.downMd);

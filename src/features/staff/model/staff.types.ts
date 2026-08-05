@@ -75,6 +75,10 @@ export interface Employee {
   accountType: AccountType | null;
   pixKey: string | null;
   isActive: boolean;
+  canAccessTimeClock: boolean;
+  canAccessVisitors: boolean;
+  canAccessDeliveries: boolean;
+  hasPin: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -109,6 +113,9 @@ export interface EmployeePayload {
   pixKey?: string | null;
   pin?: string;
   isActive?: boolean;
+  canAccessTimeClock?: boolean;
+  canAccessVisitors?: boolean;
+  canAccessDeliveries?: boolean;
 }
 
 export interface TimePunch {
@@ -151,6 +158,11 @@ export interface StaffMe {
   lastPunchType: PunchType | null;
   nextPunchType: PunchType;
   geofenceRadiusMeters: number;
+  canAccessTimeClock: boolean;
+  canAccessVisitors: boolean;
+  canAccessDeliveries: boolean;
+  condominiumSlug?: string;
+  unitNumbers: string[];
 }
 
 export const ABSENCE_REASONS = [

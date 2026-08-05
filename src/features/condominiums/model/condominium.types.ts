@@ -16,7 +16,8 @@ export const MEMBERSHIP_ROLE_DESCRIPTIONS: Record<MembershipRole, string> = {
   OWNER: 'Controle total, inclusive da equipe',
   MANAGER: 'Financeiro, áreas, documentos, moradores e encomendas',
   OPERATOR: 'Somente cadastros de moradores',
-  DOORMAN: 'Registra encomendas e controla visitantes na portaria',
+  DOORMAN:
+    'Legado: use Funcionários com módulos Visitantes/Encomendas no portal (/c/…/portal). Contas porteiro existentes ainda funcionam no app.',
 };
 
 export interface CondoMember {

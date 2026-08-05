@@ -1,8 +1,8 @@
-import { App, Button, DatePicker, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { App, Button, DatePicker, Modal, Popconfirm, Select, Space, Spin, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { type Dayjs } from 'dayjs';
 import { Camera, Download, ExternalLink, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useManagerCondominium } from '@/features/condominiums/components/ManagerLayout';
 import { authSessionStore } from '@/features/auth/model/auth-session.store';
@@ -24,12 +24,20 @@ import {
 } from '../model/staff.types';
 import * as S from './PunchesAdminPage.styles';
 
+interface SelfiePreview {
+  url: string;
+  title: string;
+}
+
 export function PunchesAdminPage() {
   const condominium = useManagerCondominium();
   const { message } = App.useApp();
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [employeeId, setEmployeeId] = useState<string | undefined>();
   const [status, setStatus] = useState<PunchStatus | undefined>();
+  const [selfiePreview, setSelfiePreview] = useState<SelfiePreview | null>(null);
+  const [loadingSelfieId, setLoadingSelfieId] = useState<string | null>(null);
+  const selfieRequestId = useRef(0);
   const employeesQuery = useEmployeesQuery(condominium.id);
   const exportCsv = useExportPunchesCsvMutation(condominium.id);
   const purgeSelfies = usePurgePunchSelfiesMutation(condominium.id);
@@ -45,7 +53,27 @@ export function PunchesAdminPage() {
   );
 
   const punchesQuery = usePunchesQuery(condominium.id, filters);
-  const pontoUrl = `${window.location.origin}/c/${condominium.slug}/ponto`;
+  const pontoUrl = `${window.location.origin}/c/${condominium.slug}/portal`;
+
+  useEffect(() => {
+    return () => {
+      if (selfiePreview) {
+        URL.revokeObjectURL(selfiePreview.url);
+      }
+    };
+  }, [selfiePreview]);
+
+  const closeSelfie = () => {
+    selfieRequestId.current += 1;
+    setLoadingSelfieId(null);
+    setSelfiePreview((current) => {
+      if (current) {
+        URL.revokeObjectURL(current.url);
+      }
+
+      return null;
+    });
+  };
 
   const openSelfie = async (punch: TimePunch) => {
     const token = authSessionStore.read()?.accessToken;
@@ -54,6 +82,9 @@ export function PunchesAdminPage() {
       message.error('Sessão expirada.');
       return;
     }
+
+    const requestId = ++selfieRequestId.current;
+    setLoadingSelfieId(punch.id);
 
     try {
       const response = await fetch(staffApi.selfieUrl(condominium.id, punch.id), {
@@ -66,9 +97,33 @@ export function PunchesAdminPage() {
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
+
+      if (requestId !== selfieRequestId.current) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      const when = dayjs(punch.punchedAt).format('DD/MM/YYYY HH:mm');
+      const who = punch.employeeName ?? 'Funcionário';
+
+      setSelfiePreview((current) => {
+        if (current) {
+          URL.revokeObjectURL(current.url);
+        }
+
+        return {
+          url,
+          title: `${who} · ${PUNCH_TYPE_LABELS[punch.type]} · ${when}`,
+        };
+      });
     } catch {
-      message.error('Não foi possível abrir a selfie.');
+      if (requestId === selfieRequestId.current) {
+        message.error('Não foi possível abrir a selfie.');
+      }
+    } finally {
+      if (requestId === selfieRequestId.current) {
+        setLoadingSelfieId(null);
+      }
     }
   };
 
@@ -146,7 +201,12 @@ export function PunchesAdminPage() {
       width: 90,
       render: (_, row) =>
         row.hasSelfie ? (
-          <Button type="link" icon={<Camera size={16} />} onClick={() => void openSelfie(row)}>
+          <Button
+            type="link"
+            icon={<Camera size={16} />}
+            loading={loadingSelfieId === row.id}
+            onClick={() => void openSelfie(row)}
+          >
             Ver
           </Button>
         ) : (
@@ -187,7 +247,7 @@ export function PunchesAdminPage() {
               target="_blank"
               rel="noreferrer"
             >
-              Abrir página de ponto
+              Abrir portal do funcionário
             </Button>
           </Space>
         }
@@ -228,6 +288,21 @@ export function PunchesAdminPage() {
           pagination={{ pageSize: 30 }}
         />
       </S.Card>
+
+      <Modal
+        open={Boolean(selfiePreview) || Boolean(loadingSelfieId)}
+        title={selfiePreview?.title ?? 'Selfie do ponto'}
+        onCancel={closeSelfie}
+        footer={null}
+        centered
+        destroyOnHidden
+        width={480}
+      >
+        <S.SelfieFrame>
+          {loadingSelfieId && !selfiePreview ? <Spin tip="Carregando selfie…" /> : null}
+          {selfiePreview ? <img src={selfiePreview.url} alt={selfiePreview.title} /> : null}
+        </S.SelfieFrame>
+      </Modal>
     </>
   );
 }

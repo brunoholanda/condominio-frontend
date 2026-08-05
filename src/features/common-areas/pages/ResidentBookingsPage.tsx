@@ -1,9 +1,21 @@
-import { App, Button, Checkbox, DatePicker, Form, Input, Modal, Result, Skeleton, Table, Tag } from 'antd';
+import {
+  Alert,
+  App,
+  Button,
+  Checkbox,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Skeleton,
+  Table,
+  Tag,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { type Dayjs } from 'dayjs';
 import { CalendarPlus } from 'lucide-react';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { ApiError } from '@/shared/api/api-error';
 import { PageHeading } from '@/shared/components/PageHeading/PageHeading';
@@ -39,22 +51,19 @@ export function ResidentBookingsPage() {
   const createBooking = useCreateMyBookingMutation(slug ?? '');
   const cancelBooking = useCancelMyBookingMutation(slug ?? '');
 
-  if (bookingsQuery.isError) {
-    const errorMessage =
-      bookingsQuery.error instanceof ApiError
+  const canBook = bookingsQuery.isSuccess;
+  const accessErrorMessage =
+    bookingsQuery.isError
+      ? bookingsQuery.error instanceof ApiError
         ? bookingsQuery.error.message
-        : 'Não foi possível abrir suas reservas.';
-
-    return (
-      <Result
-        status="403"
-        title="Reservas indisponíveis"
-        subTitle={errorMessage}
-      />
-    );
-  }
+        : 'Não foi possível abrir suas reservas.'
+      : null;
 
   const openBookingForm = (area: CommonArea) => {
+    if (!canBook) {
+      return;
+    }
+
     setBookingArea(area);
     form.resetFields();
   };
@@ -135,7 +144,40 @@ export function ResidentBookingsPage() {
         description="Escolha uma área, confira as regras e envie sua solicitação de reserva."
       />
 
+      {accessErrorMessage ? (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="Reservas ainda não liberadas para esta conta"
+          description={
+            <>
+              {accessErrorMessage} Se você é morador, peça à administração para vincular seu e-mail
+              à unidade em Áreas comuns. Gestores usam a área logada em{' '}
+              <Link to="/app">Meus condomínios</Link>.
+            </>
+          }
+        />
+      ) : null}
+
       {areasQuery.isLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : null}
+
+      {areasQuery.isError ? (
+        <Alert
+          type="error"
+          showIcon
+          message="Não foi possível carregar as áreas comuns"
+          description={
+            areasQuery.error instanceof ApiError
+              ? areasQuery.error.message
+              : 'Tente novamente em instantes.'
+          }
+        />
+      ) : null}
+
+      {!areasQuery.isLoading && !areasQuery.isError && (areasQuery.data?.length ?? 0) === 0 ? (
+        <Alert type="info" showIcon message="Nenhuma área comum disponível para reserva no momento." />
+      ) : null}
 
       <S.Grid>
         {(areasQuery.data ?? []).map((area) => (
@@ -149,6 +191,7 @@ export function ResidentBookingsPage() {
             <Button
               type="primary"
               icon={<CalendarPlus size={16} />}
+              disabled={!canBook}
               onClick={() => openBookingForm(area)}
             >
               Reservar
@@ -159,14 +202,18 @@ export function ResidentBookingsPage() {
 
       <PageHeading title="Minhas reservas" />
 
-      <Table<Booking>
-        rowKey="id"
-        columns={columns}
-        dataSource={bookingsQuery.data ?? []}
-        loading={bookingsQuery.isLoading}
-        {...mobileTableProps(isMobile)}
-        pagination={false}
-      />
+      {canBook ? (
+        <Table<Booking>
+          rowKey="id"
+          columns={columns}
+          dataSource={bookingsQuery.data ?? []}
+          loading={bookingsQuery.isLoading}
+          {...mobileTableProps(isMobile)}
+          pagination={false}
+        />
+      ) : bookingsQuery.isLoading ? (
+        <Skeleton active paragraph={{ rows: 3 }} />
+      ) : null}
 
       <Modal
         open={Boolean(bookingArea)}

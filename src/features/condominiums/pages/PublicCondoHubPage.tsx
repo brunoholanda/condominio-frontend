@@ -20,7 +20,11 @@ import { CONTACT_CATEGORY_LABELS } from '@/features/directory/model/contact.type
 import { onlyDigits, maskPhone } from '@/shared/utils/masks';
 import { usePublicCondominiumQuery } from '../hooks/use-condominiums';
 import type { PublicHubLink } from '../model/public-qr.types';
-import { PUBLIC_HUB_LINK_HINTS, PUBLIC_HUB_LINK_LABELS } from '../model/public-qr.types';
+import {
+  PUBLIC_HUB_LINK_HINTS,
+  PUBLIC_HUB_LINK_LABELS,
+  publicPathForTarget,
+} from '../model/public-qr.types';
 import * as S from './PublicCondoHubPage.styles';
 
 const CATEGORY_ICONS: Record<ContactCategory, typeof Phone> = {
@@ -124,7 +128,7 @@ export function PublicCondoHubPage() {
             const Icon = SERVICE_ICONS[link];
 
             return (
-              <S.LinkButton key={link} href={`/c/${slug}/${link}`}>
+              <S.LinkButton key={link} href={publicPathForTarget(slug!, link)}>
                 <S.LinkIcon aria-hidden>
                   <Icon size={18} />
                 </S.LinkIcon>

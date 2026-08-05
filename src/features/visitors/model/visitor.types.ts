@@ -32,9 +32,11 @@ export interface VisitorPass {
   expiresAt: string;
   status: VisitorPassStatus;
   notes: string | null;
-  createdByUserId: string;
+  createdByUserId: string | null;
+  createdByEmployeeId?: string | null;
   checkedInAt: string | null;
   checkedInByUserId: string | null;
+  checkedInByEmployeeId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

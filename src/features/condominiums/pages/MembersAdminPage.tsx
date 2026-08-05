@@ -24,10 +24,19 @@ import {
 } from '../model/condominium.types';
 import * as S from './MembersAdminPage.styles';
 
-const ROLE_OPTIONS = MEMBERSHIP_ROLES.map((value) => ({
+/** Novos vínculos não oferecem Porteiro — portaria vai pelo portal do funcionário. */
+const INVITE_ROLES = MEMBERSHIP_ROLES.filter((role) => role !== 'DOORMAN');
+
+const INVITE_ROLE_OPTIONS = INVITE_ROLES.map((value) => ({
   value,
   label: MEMBERSHIP_ROLE_LABELS[value],
 }));
+
+const ROLE_OPTIONS_FOR_MEMBER = (current: MembershipRole) =>
+  MEMBERSHIP_ROLES.filter((role) => role !== 'DOORMAN' || role === current).map((value) => ({
+    value,
+    label: MEMBERSHIP_ROLE_LABELS[value],
+  }));
 
 interface AddMemberFormValues {
   email: string;
@@ -145,8 +154,9 @@ export function MembersAdminPage() {
 
       <S.Hint>
         Cada pessoa precisa de uma conta na plataforma. Você pode criar a conta aqui ou vincular
-        alguém que já se cadastrou em /registro. Gestores novos também podem se cadastrar sozinhos e
-        criar os próprios condomínios.
+        alguém que já se cadastrou em /registro. Para portaria (visitantes, encomendas e ponto), use
+        Funcionários com os módulos do portal — o papel Porteiro não é mais oferecido para novos
+        vínculos.
       </S.Hint>
 
       {membersQuery.isLoading ? <Skeleton active paragraph={{ rows: 4 }} /> : null}
@@ -169,7 +179,7 @@ export function MembersAdminPage() {
                 <S.Actions>
                   <Select
                     value={member.role}
-                    options={ROLE_OPTIONS}
+                    options={ROLE_OPTIONS_FOR_MEMBER(member.role)}
                     style={{ minWidth: isMobile ? undefined : 160, width: isMobile ? '100%' : undefined }}
                     disabled={updateRole.isPending}
                     onChange={(role) => handleRoleChange(member, role)}
@@ -241,15 +251,19 @@ export function MembersAdminPage() {
           ) : null}
 
           <Form.Item name="role" label="Papel de acesso" rules={[rules.required()]}>
-            <Select options={ROLE_OPTIONS} />
+            <Select options={INVITE_ROLE_OPTIONS} />
           </Form.Item>
 
           <S.RoleHelp>
-            {MEMBERSHIP_ROLES.map((role) => (
+            {INVITE_ROLES.map((role) => (
               <li key={role}>
                 <strong>{MEMBERSHIP_ROLE_LABELS[role]}:</strong> {MEMBERSHIP_ROLE_DESCRIPTIONS[role]}
               </li>
             ))}
+            <li>
+              <strong>Portaria (visitantes/encomendas/ponto):</strong> cadastre em{' '}
+              <em>Funcionários</em> e libere os módulos do portal (CPF + PIN em /c/…/portal).
+            </li>
           </S.RoleHelp>
 
           <Form.Item style={{ marginTop: 16, marginBottom: 0 }}>

@@ -54,6 +54,9 @@ interface FormValues extends Omit<EmployeePayload, 'birthDate' | 'admissionDate'
   admissionDate?: Dayjs | null;
   pin?: string;
   benefitsText?: string;
+  canAccessTimeClock?: boolean;
+  canAccessVisitors?: boolean;
+  canAccessDeliveries?: boolean;
 }
 
 type StepKey = 'pessoais' | 'contrato' | 'remuneracao' | 'acesso';
@@ -166,13 +169,13 @@ function buildSteps(isNew: boolean): WizardStep[] {
     },
     {
       key: 'acesso',
-      title: 'Acesso ao ponto',
+      title: 'Portal do funcionário',
       shortTitle: 'Acesso',
       description: isNew
-        ? 'Defina o PIN que o funcionário usará no ponto pelo celular.'
-        : 'Troque o PIN se precisar. Em branco, o atual é mantido.',
+        ? 'Escolha os módulos do portal (CPF + PIN) e defina o PIN quando houver acesso.'
+        : 'Ajuste módulos e PIN. Em branco, o PIN atual é mantido.',
       icon: <KeyRound size={18} />,
-      fields: ['pin'],
+      fields: ['canAccessTimeClock', 'canAccessVisitors', 'canAccessDeliveries', 'pin'],
     },
   ];
 }
@@ -228,6 +231,9 @@ export function EmployeeForm({
       admissionDate: e.admissionDate ? dayjs(e.admissionDate) : null,
       benefitsText: benefitsToText(e.benefits),
       pin: undefined,
+      canAccessTimeClock: e.canAccessTimeClock,
+      canAccessVisitors: e.canAccessVisitors,
+      canAccessDeliveries: e.canAccessDeliveries,
     });
     if (e.zipCode) {
       lastCep.current = onlyDigits(e.zipCode);
@@ -263,8 +269,16 @@ export function EmployeeForm({
     accountType: values.accountType ?? null,
     pixKey: values.pixKey || null,
     isActive: values.isActive !== false,
+    canAccessTimeClock: values.canAccessTimeClock !== false,
+    canAccessVisitors: values.canAccessVisitors === true,
+    canAccessDeliveries: values.canAccessDeliveries === true,
     pin: values.pin,
   });
+
+  const needsPortalAccess = (values: FormValues) =>
+    values.canAccessTimeClock !== false ||
+    values.canAccessVisitors === true ||
+    values.canAccessDeliveries === true;
 
   const closeOrLeave = () => {
     if (onCancel) {
@@ -317,37 +331,47 @@ export function EmployeeForm({
   };
 
   const save = (values: FormValues) => {
+    const needsPin = needsPortalAccess(values);
+    const hasExistingPin = Boolean(employeeQuery.data?.hasPin);
+
+    if (needsPin && isNew && !values.pin) {
+      message.error('Informe o PIN: ele é obrigatório quando há módulos do portal liberados.');
+      return;
+    }
+
+    if (needsPin && !isNew && !hasExistingPin && !values.pin) {
+      message.error('Informe o PIN: ele é obrigatório quando há módulos do portal liberados.');
+      return;
+    }
+
     if (isNew) {
-      if (!values.pin) {
-        message.error('Informe o PIN de acesso ao ponto.');
-        return;
+      const payload = toPayload(values);
+      if (!payload.pin) {
+        delete payload.pin;
       }
 
-      createEmployee.mutate(
-        { ...toPayload(values), pin: values.pin },
-        {
-          onSuccess: (employee) => {
-            message.success('Funcionário cadastrado.');
-            if (onCreated) {
-              onCreated(employee.id);
-              return;
-            }
+      createEmployee.mutate(payload, {
+        onSuccess: (employee) => {
+          message.success('Funcionário cadastrado.');
+          if (onCreated) {
+            onCreated(employee.id);
+            return;
+          }
 
-            void navigate(`/app/condominios/${condominium.id}/funcionarios/${employee.id}`);
-          },
-          onError: (error: unknown) => {
-            if (error instanceof ApiError && error.code === 'CONDO_LOCATION_REQUIRED') {
-              message.error(error.message);
-              void navigate(`/app/condominios/${condominium.id}/localizacao`);
-              return;
-            }
-
-            message.error(
-              error instanceof ApiError ? error.message : 'Não foi possível salvar.',
-            );
-          },
+          void navigate(`/app/condominios/${condominium.id}/funcionarios/${employee.id}`);
         },
-      );
+        onError: (error: unknown) => {
+          if (error instanceof ApiError && error.code === 'CONDO_LOCATION_REQUIRED') {
+            message.error(error.message);
+            void navigate(`/app/condominios/${condominium.id}/localizacao`);
+            return;
+          }
+
+          message.error(
+            error instanceof ApiError ? error.message : 'Não foi possível salvar.',
+          );
+        },
+      });
       return;
     }
 
@@ -452,9 +476,16 @@ export function EmployeeForm({
         layout="vertical"
         requiredMark={false}
         disabled={saving || (!isNew && employeeQuery.isLoading)}
-        initialValues={{ contractType: 'CLT', isActive: true, nationality: 'Brasileira' }}
-        onFinish={() => undefined}
-      >
+          initialValues={{
+            contractType: 'CLT',
+            isActive: true,
+            nationality: 'Brasileira',
+            canAccessTimeClock: true,
+            canAccessVisitors: false,
+            canAccessDeliveries: false,
+          }}
+          onFinish={() => undefined}
+        >
         <S.StepPanel>
           <S.StepHeader>
             <S.StepIcon aria-hidden>{currentStep.icon}</S.StepIcon>
@@ -680,20 +711,74 @@ export function EmployeeForm({
             <div hidden={currentStep.key !== 'acesso'}>
               <S.FieldGrid>
                 <Form.Item
-                  className="span-2"
-                  name="pin"
-                  label={isNew ? 'PIN (4 a 6 dígitos)' : 'Novo PIN (deixe em branco para manter)'}
-                  rules={
-                    isNew
-                      ? [
-                          rules.required('Informe o PIN'),
-                          { pattern: /^\d{4,6}$/, message: 'PIN com 4 a 6 dígitos' },
-                        ]
-                      : [{ pattern: /^\d{4,6}$/, message: 'PIN com 4 a 6 dígitos' }]
-                  }
-                  extra="O funcionário usa CPF + PIN na página pública de ponto no celular."
+                  name="canAccessTimeClock"
+                  label="Ponto eletrônico"
+                  valuePropName="checked"
+                  extra="Registrar entrada/saída com GPS e selfie no celular."
                 >
-                  <Input.Password maxLength={6} inputMode="numeric" autoComplete="off" />
+                  <Switch />
+                </Form.Item>
+                <Form.Item
+                  name="canAccessVisitors"
+                  label="Visitantes"
+                  valuePropName="checked"
+                  extra="Cadastrar visitantes e fazer check-in na portaria."
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item
+                  name="canAccessDeliveries"
+                  label="Encomendas"
+                  valuePropName="checked"
+                  extra="Registrar encomendas e protocolar entregas."
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item
+                  className="span-2"
+                  shouldUpdate={(prev, next) =>
+                    prev.canAccessTimeClock !== next.canAccessTimeClock ||
+                    prev.canAccessVisitors !== next.canAccessVisitors ||
+                    prev.canAccessDeliveries !== next.canAccessDeliveries
+                  }
+                >
+                  {() => {
+                    const values = form.getFieldsValue([
+                      'canAccessTimeClock',
+                      'canAccessVisitors',
+                      'canAccessDeliveries',
+                    ]);
+                    const needsPin = needsPortalAccess(values);
+                    const hasExistingPin = Boolean(employeeQuery.data?.hasPin);
+
+                    return (
+                      <Form.Item
+                        name="pin"
+                        label={
+                          isNew
+                            ? 'PIN (4 a 6 dígitos)'
+                            : hasExistingPin
+                              ? 'Novo PIN (deixe em branco para manter)'
+                              : 'PIN (4 a 6 dígitos)'
+                        }
+                        rules={
+                          needsPin && (isNew || !hasExistingPin)
+                            ? [
+                                rules.required('Informe o PIN'),
+                                { pattern: /^\d{4,6}$/, message: 'PIN com 4 a 6 dígitos' },
+                              ]
+                            : [{ pattern: /^\d{4,6}$/, message: 'PIN com 4 a 6 dígitos' }]
+                        }
+                        extra={
+                          needsPin
+                            ? `Portal em /c/${condominium.slug}/portal — login com CPF + PIN.`
+                            : 'Sem módulos liberados: o funcionário fica só no cadastro de RH (PIN opcional).'
+                        }
+                      >
+                        <Input.Password maxLength={6} inputMode="numeric" autoComplete="off" />
+                      </Form.Item>
+                    );
+                  }}
                 </Form.Item>
               </S.FieldGrid>
             </div>
@@ -733,7 +818,7 @@ export function EmployeeForm({
     <S.Page>
       <PageHeading
         title={isNew ? 'Novo funcionário' : 'Ficha do funcionário'}
-        description="Cadastro em etapas: pessoais, contrato, remuneração e acesso ao ponto."
+        description="Cadastro em etapas: pessoais, contrato, remuneração e portal do funcionário."
       />
 
       <S.Card>{formBody}</S.Card>

@@ -43,6 +43,11 @@ export function MyCondominiumsPage() {
     () => condominiums.filter((condo) => condo.myRole === 'OWNER').length,
     [condominiums],
   );
+  const isDoormanWithoutOwnership =
+    !isSystemOwner &&
+    ownedCount === 0 &&
+    condominiums.some((condo) => condo.myRole === 'DOORMAN');
+  const canCreateCondo = !isDoormanWithoutOwnership;
   const hitCondoLimit =
     !isSystemOwner && (plan === 'lite' || plan === 'prime') && ownedCount >= 1;
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -59,6 +64,11 @@ export function MyCondominiumsPage() {
   }, [condominiums, query]);
 
   const goNewCondo = () => {
+    if (!canCreateCondo) {
+      message.info('Contas de porteiro não podem criar condomínios.');
+      return;
+    }
+
     if (hitCondoLimit) {
       setUpgradeOpen(true);
       return;
@@ -119,11 +129,13 @@ export function MyCondominiumsPage() {
           </S.HeroCopy>
 
           <S.HeroAside>
-            <S.PrimaryCta>
-              <Button type="primary" size="large" icon={<Plus size={18} />} onClick={goNewCondo}>
-                Novo condomínio
-              </Button>
-            </S.PrimaryCta>
+            {canCreateCondo ? (
+              <S.PrimaryCta>
+                <Button type="primary" size="large" icon={<Plus size={18} />} onClick={goNewCondo}>
+                  Novo condomínio
+                </Button>
+              </S.PrimaryCta>
+            ) : null}
             <S.QuietLinks aria-label="Atalhos da conta">
               <S.QuietLink type="button" onClick={() => void navigate('/app/conta')}>
                 <UserRound size={15} aria-hidden />
@@ -279,16 +291,18 @@ export function MyCondominiumsPage() {
                   </S.CondoLink>
                 ))}
 
-                <S.AddCondo
-                  type="button"
-                  onClick={goNewCondo}
-                  $delay={40 + filtered.length * 40}
-                >
-                  <Plus size={22} aria-hidden />
-                  {hitCondoLimit
-                    ? 'Novo condomínio — plano Gestor'
-                    : 'Cadastrar outro condomínio'}
-                </S.AddCondo>
+                {canCreateCondo ? (
+                  <S.AddCondo
+                    type="button"
+                    onClick={goNewCondo}
+                    $delay={40 + filtered.length * 40}
+                  >
+                    <Plus size={22} aria-hidden />
+                    {hitCondoLimit
+                      ? 'Novo condomínio — plano Gestor'
+                      : 'Cadastrar outro condomínio'}
+                  </S.AddCondo>
+                ) : null}
               </S.List>
             )}
 

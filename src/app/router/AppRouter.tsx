@@ -35,6 +35,7 @@ import { EmployeesListPage } from '@/features/staff/pages/EmployeesListPage';
 import { EmployeeFormPage } from '@/features/staff/pages/EmployeeFormPage';
 import { PunchesAdminPage } from '@/features/staff/pages/PunchesAdminPage';
 import { AbsencesAdminPage } from '@/features/staff/pages/AbsencesAdminPage';
+import { StaffPortalPage } from '@/features/staff/pages/StaffPortalPage';
 import { TimeClockPage } from '@/features/staff/pages/TimeClockPage';
 import { CondoSettingsPage } from '@/features/condominiums/pages/CondoSettingsPage';
 import { VisitorsPage } from '@/features/visitors/pages/VisitorsPage';
@@ -100,6 +101,7 @@ export function AppRouter() {
         <Route path="c/:slug/transparencia" element={<TransparencyPortalPage />} />
         <Route path="c/:slug/transparencia/:payableId" element={<TransparencyPayableDetailPage />} />
         <Route path="c/:slug/sugestoes" element={<PublicSuggestionsPage />} />
+        <Route path="c/:slug/portal" element={<StaffPortalPage />} />
         <Route path="c/:slug/ponto" element={<TimeClockPage />} />
         <Route path="cadastro" element={<Navigate to={`/c/${LEGACY_SLUG}/cadastro`} replace />} />
         <Route path="moradores" element={<Navigate to="/app" replace />} />

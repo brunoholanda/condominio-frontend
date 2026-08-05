@@ -25,8 +25,10 @@ export interface PackageListItem {
 
 export interface CondoPackage extends PackageListItem {
   condominiumId: string;
-  receivedByUserId: string;
+  receivedByUserId: string | null;
+  receivedByEmployeeId?: string | null;
   deliveredByUserId: string | null;
+  deliveredByEmployeeId?: string | null;
   signature: string | null;
   createdAt: string;
   updatedAt: string;

@@ -38,7 +38,7 @@ export function useCreateEmployeeMutation(condominiumId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: EmployeePayload & { pin: string }) =>
+    mutationFn: (payload: EmployeePayload & { pin?: string }) =>
       staffApi.create(condominiumId, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: staffKeys.list(condominiumId) }),
   });

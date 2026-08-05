@@ -18,7 +18,7 @@ export const PUBLIC_HUB_LINK_LABELS: Record<PublicHubLink, string> = {
   transparencia: 'Portal da transparência',
   sugestoes: 'Caixa de sugestões',
   reservas: 'Reservas de áreas comuns',
-  ponto: 'Ponto eletrônico',
+  ponto: 'Portal do funcionário',
 };
 
 export const PUBLIC_QR_TARGET_LABELS: Record<PublicQrTarget, string> = {
@@ -32,7 +32,7 @@ export const PUBLIC_HUB_LINK_HINTS: Record<PublicHubLink, string> = {
   transparencia: 'Contas pagas e anexos',
   sugestoes: 'Caixa de sugestões dos moradores',
   reservas: 'Reserva de áreas comuns',
-  ponto: 'Registro de ponto dos funcionários',
+  ponto: 'Ponto, visitantes e encomendas',
 };
 
 export const PUBLIC_QR_TARGET_HINTS: Record<PublicQrTarget, string> = {
@@ -55,6 +55,6 @@ export function publicPathForTarget(slug: string, target: PublicQrTarget): strin
     case 'reservas':
       return `/c/${slug}/reservas`;
     case 'ponto':
-      return `/c/${slug}/ponto`;
+      return `/c/${slug}/portal`;
   }
 }

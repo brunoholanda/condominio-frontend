@@ -25,7 +25,8 @@ function isPublicServicePath(pathname: string): boolean {
     pathname === '/cadastro' ||
     Boolean(matchPath({ path: '/c/:slug/cadastro', end: true }, pathname)) ||
     Boolean(matchPath({ path: '/c/:slug/portal', end: true }, pathname)) ||
-    Boolean(matchPath({ path: '/c/:slug/ponto', end: true }, pathname))
+    Boolean(matchPath({ path: '/c/:slug/ponto', end: true }, pathname)) ||
+    Boolean(matchPath({ path: '/c/:slug/reservas', end: true }, pathname))
   );
 }
 export function AppLayout() {

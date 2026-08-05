@@ -48,7 +48,7 @@ export interface Booking {
   commonAreaId: string;
   condominiumId: string;
   unitNumber: string;
-  residentAccountId: string;
+  residentId: string;
   startsAt: string;
   endsAt: string;
   status: BookingStatus;

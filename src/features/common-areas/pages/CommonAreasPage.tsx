@@ -12,7 +12,6 @@ import { formatCentsToBRL } from '@/shared/utils/currency';
 import { mobileTableProps } from '@/shared/utils/mobile-ui';
 import { queries } from '@/styles/theme';
 import { CommonAreaFormModal } from '../components/CommonAreaFormModal';
-import { CreateResidentAccountForm } from '../components/CreateResidentAccountForm';
 import {
   useApproveBookingMutation,
   useManagerBookingsQuery,
@@ -24,7 +23,6 @@ import {
   useDeleteCommonAreaMutation,
   useUpdateCommonAreaMutation,
 } from '../hooks/use-common-areas';
-import { useResidentAccountsQuery } from '../hooks/use-resident-accounts';
 import type {
   Booking,
   BookingStatus,
@@ -378,60 +376,6 @@ function BookingsTab({ condominiumId }: { condominiumId: string }) {
   );
 }
 
-function ResidentAccountsTab({ condominiumId, units }: { condominiumId: string; units: string[] }) {
-  const isMobile = useMediaQuery(queries.downMd);
-  const accountsQuery = useResidentAccountsQuery(condominiumId);
-  const accounts = accountsQuery.data ?? [];
-
-  const columns: ColumnsType<{ id: string; unitNumber: string; createdAt: string }> = [
-    { title: 'Unidade', dataIndex: 'unitNumber', width: 130 },
-    {
-      title: 'Vinculada em',
-      dataIndex: 'createdAt',
-      render: (createdAt: string) => dayjs(createdAt).format('DD/MM/YYYY'),
-    },
-  ];
-
-  return (
-    <>
-      <S.AccountsIntro>
-        Vincule a conta de um morador (já cadastrada em <strong>/registro</strong>) a uma unidade
-        para que ele possa reservar áreas comuns em <code>/c/{'{slug}'}/reservas</code>.
-      </S.AccountsIntro>
-
-      <CreateResidentAccountForm condominiumId={condominiumId} units={units} />
-
-      {accountsQuery.isLoading ? (
-        <Skeleton active paragraph={{ rows: 4 }} style={{ marginTop: 24 }} />
-      ) : isMobile ? (
-        accounts.length === 0 ? (
-          <S.CardEmpty>Nenhuma conta vinculada.</S.CardEmpty>
-        ) : (
-          <S.CardList style={{ marginTop: 24 }}>
-            {accounts.map((account) => (
-              <S.ItemCard key={account.id}>
-                <S.CardTitle>Unidade {account.unitNumber}</S.CardTitle>
-                <S.CardMeta>
-                  Vinculada em {dayjs(account.createdAt).format('DD/MM/YYYY')}
-                </S.CardMeta>
-              </S.ItemCard>
-            ))}
-          </S.CardList>
-        )
-      ) : (
-        <Table
-          style={{ marginTop: 24 }}
-          rowKey="id"
-          columns={columns}
-          dataSource={accounts}
-          {...mobileTableProps(false)}
-          pagination={false}
-        />
-      )}
-    </>
-  );
-}
-
 export function CommonAreasPage() {
   const condominium = useManagerCondominium();
 
@@ -439,7 +383,7 @@ export function CommonAreasPage() {
     <>
       <PageHeading
         title="Áreas comuns"
-        description="Cadastre as áreas disponíveis, aprove reservas e vincule contas de moradores às unidades."
+        description="Cadastre as áreas disponíveis e aprove reservas. Moradores acessam a página pública de reservas com CPF e código enviado ao e-mail do cadastro."
       />
 
       <Tabs
@@ -454,13 +398,6 @@ export function CommonAreasPage() {
             key: 'bookings',
             label: 'Reservas',
             children: <BookingsTab condominiumId={condominium.id} />,
-          },
-          {
-            key: 'accounts',
-            label: 'Contas de moradores',
-            children: (
-              <ResidentAccountsTab condominiumId={condominium.id} units={condominium.unitNumbers} />
-            ),
           },
         ]}
       />

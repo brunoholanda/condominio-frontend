@@ -102,13 +102,13 @@ export function AppRouter() {
         <Route path="c/:slug/transparencia" element={<TransparencyPortalPage />} />
         <Route path="c/:slug/transparencia/:payableId" element={<TransparencyPayableDetailPage />} />
         <Route path="c/:slug/sugestoes" element={<PublicSuggestionsPage />} />
+        <Route path="c/:slug/reservas" element={<ResidentBookingsPage />} />
         <Route path="c/:slug/portal" element={<StaffPortalPage />} />
         <Route path="c/:slug/ponto" element={<TimeClockPage />} />
         <Route path="cadastro" element={<Navigate to={`/c/${LEGACY_SLUG}/cadastro`} replace />} />
         <Route path="moradores" element={<Navigate to="/app" replace />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="c/:slug/reservas" element={<ResidentBookingsPage />} />
           <Route path="app" element={<MyCondominiumsPage />} />
           <Route path="app/conta" element={<MyAccountPage />} />
           <Route path="app/conta/inventario-lgpd" element={<DataInventoryPage />} />

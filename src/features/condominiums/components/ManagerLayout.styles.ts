@@ -89,10 +89,11 @@ export const Body = styled.div`
 export const Sidebar = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(1)};
-  width: 240px;
+  gap: ${({ theme }) => theme.spacing(4)};
+  width: 248px;
   flex-shrink: 0;
-  padding: ${({ theme }) => theme.spacing(5)} ${({ theme }) => theme.spacing(3)};
+  padding: ${({ theme }) => theme.spacing(4)} ${({ theme }) => theme.spacing(3)};
+  overflow-y: auto;
   background: ${({ theme }) => theme.colors.surface};
   border-right: 1px solid ${({ theme }) => theme.colors.border};
 `;
@@ -100,18 +101,40 @@ export const Sidebar = styled.nav`
 export const DrawerNav = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(1)};
+  gap: ${({ theme }) => theme.spacing(4)};
+`;
+
+export const NavGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+`;
+
+export const NavGroupLabel = styled.p`
+  margin: 0;
+  padding: ${({ theme }) => `0 ${theme.spacing(3)} ${theme.spacing(1)}`};
+  color: ${({ theme }) => theme.colors.textMuted};
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+`;
+
+export const NavGroupItems = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 `;
 
 export const SidebarItem = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
-  min-height: 44px;
+  min-height: 40px;
   padding: ${({ theme }) => `${theme.spacing(2)} ${theme.spacing(3)}`};
   border-radius: ${({ theme }) => theme.radii.sm};
   color: ${({ theme }) => theme.colors.text};
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   text-decoration: none;
   transition:
@@ -164,11 +187,11 @@ export const SidebarLink = styled.a`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
-  min-height: 44px;
+  min-height: 40px;
   padding: ${({ theme }) => `${theme.spacing(2)} ${theme.spacing(3)}`};
   border-radius: ${({ theme }) => theme.radii.sm};
   color: ${({ theme }) => theme.colors.text};
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   text-decoration: none;
   transition: background 0.15s ease;

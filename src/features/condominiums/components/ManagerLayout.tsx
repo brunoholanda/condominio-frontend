@@ -8,7 +8,6 @@ import {
   ExternalLink,
   FileText,
   LogOut,
-  MapPin,
   Menu,
   MessageSquareText,
   Package,
@@ -21,7 +20,8 @@ import {
   Wallet,
   Wrench,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { Children, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -49,6 +49,21 @@ export function CondoHomeRedirect() {
   );
 }
 
+function NavSection({ label, children }: { label: string; children: ReactNode }) {
+  const items = Children.toArray(children).filter(Boolean);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <S.NavGroup>
+      <S.NavGroupLabel>{label}</S.NavGroupLabel>
+      <S.NavGroupItems>{items}</S.NavGroupItems>
+    </S.NavGroup>
+  );
+}
+
 function CondoNav({
   condominium,
   onNavigate,
@@ -67,98 +82,131 @@ function CondoNav({
   const canShareQr = canSeeResidents;
 
   const linkProps = onNavigate ? { onClick: () => onNavigate() } : {};
+  const base = `/app/condominios/${condominium.id}`;
 
   return (
     <>
-      {canSeeResidents ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/moradores`} {...linkProps}>
-          <Users size={16} aria-hidden />
-          Moradores
-        </S.SidebarItem>
-      ) : null}
-      {canSeeDeliveries ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/entregas`} {...linkProps}>
-          <Package size={16} aria-hidden />
-          Encomendas
-        </S.SidebarItem>
-      ) : null}
-      {canSeeVisitors ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/visitantes`} {...linkProps}>
-          <UserPlus size={16} aria-hidden />
-          Visitantes
-        </S.SidebarItem>
-      ) : null}
-      {canSeeWorkOrders ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/chamados`} {...linkProps}>
-          <Wrench size={16} aria-hidden />
-          Chamados
-        </S.SidebarItem>
-      ) : null}
-      {canManage ? (
-        <>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/funcionarios`} {...linkProps}>
-            <UserRound size={16} aria-hidden />
-            Funcionários
+      <NavSection label="Cadastro">
+        {canSeeResidents ? (
+          <S.SidebarItem to={`${base}/moradores`} {...linkProps}>
+            <Users size={16} aria-hidden />
+            Moradores
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/ponto`} {...linkProps}>
-            <Clock3 size={16} aria-hidden />
-            Ponto
+        ) : null}
+        {canManage ? (
+          <S.SidebarItem to={`${base}/dados`} {...linkProps}>
+            <Building2 size={16} aria-hidden />
+            Dados do condomínio
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/faltas`} {...linkProps}>
-            <ClipboardList size={16} aria-hidden />
-            Faltas
+        ) : null}
+      </NavSection>
+
+      <NavSection label="Portaria">
+        {canSeeDeliveries ? (
+          <S.SidebarItem to={`${base}/entregas`} {...linkProps}>
+            <Package size={16} aria-hidden />
+            Encomendas
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/localizacao`} {...linkProps}>
-            <MapPin size={16} aria-hidden />
-            Localização
+        ) : null}
+        {canSeeVisitors ? (
+          <S.SidebarItem to={`${base}/visitantes`} {...linkProps}>
+            <UserPlus size={16} aria-hidden />
+            Visitantes
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/financeiro`} {...linkProps}>
-            <Wallet size={16} aria-hidden />
-            Financeiro
-          </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/cobrancas`} {...linkProps}>
-            <Banknote size={16} aria-hidden />
-            Cobranças
-          </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/areas`} {...linkProps}>
+        ) : null}
+      </NavSection>
+
+      <NavSection label="Operação">
+        {canManage ? (
+          <S.SidebarItem to={`${base}/areas`} {...linkProps}>
             <CalendarCheck size={16} aria-hidden />
             Áreas comuns
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/documentos`} {...linkProps}>
-            <FileText size={16} aria-hidden />
-            Documentos
+        ) : null}
+      </NavSection>
+
+      <NavSection label="RH">
+        {canManage ? (
+          <>
+            <S.SidebarItem to={`${base}/funcionarios`} {...linkProps}>
+              <UserRound size={16} aria-hidden />
+              Funcionários
+            </S.SidebarItem>
+            <S.SidebarItem to={`${base}/ponto`} {...linkProps}>
+              <Clock3 size={16} aria-hidden />
+              Ponto
+            </S.SidebarItem>
+            <S.SidebarItem to={`${base}/faltas`} {...linkProps}>
+              <ClipboardList size={16} aria-hidden />
+              Faltas
+            </S.SidebarItem>
+          </>
+        ) : null}
+      </NavSection>
+
+      <NavSection label="Financeiro">
+        {canManage ? (
+          <>
+            <S.SidebarItem to={`${base}/financeiro`} {...linkProps}>
+              <Wallet size={16} aria-hidden />
+              Contas a pagar
+            </S.SidebarItem>
+            <S.SidebarItem to={`${base}/cobrancas`} {...linkProps}>
+              <Banknote size={16} aria-hidden />
+              Cobranças
+            </S.SidebarItem>
+          </>
+        ) : null}
+      </NavSection>
+
+      <NavSection label="Comunicação">
+        {canManage ? (
+          <>
+            <S.SidebarItem to={`${base}/documentos`} {...linkProps}>
+              <FileText size={16} aria-hidden />
+              Documentos
+            </S.SidebarItem>
+            <S.SidebarItem to={`${base}/sugestoes`} {...linkProps}>
+              <MessageSquareText size={16} aria-hidden />
+              Sugestões
+            </S.SidebarItem>
+            <S.SidebarItem to={`${base}/contatos`} {...linkProps}>
+              <Phone size={16} aria-hidden />
+              Contatos
+            </S.SidebarItem>
+          </>
+        ) : null}
+        {canShareQr ? (
+          <S.SidebarItem to={`${base}/qr-codes`} {...linkProps}>
+            <QrCode size={16} aria-hidden />
+            Página pública
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/sugestoes`} {...linkProps}>
-            <MessageSquareText size={16} aria-hidden />
-            Sugestões
+        ) : null}
+        <S.SidebarLink
+          href={`/c/${condominium.slug}`}
+          target="_blank"
+          rel="noreferrer"
+          onClick={onNavigate}
+        >
+          <ExternalLink size={16} aria-hidden />
+          Ver página pública
+        </S.SidebarLink>
+      </NavSection>
+
+      <NavSection label="Administração">
+        {isOwner ? (
+          <S.SidebarItem to={`${base}/equipe`} {...linkProps}>
+            <UserCog size={16} aria-hidden />
+            Equipe
           </S.SidebarItem>
-          <S.SidebarItem to={`/app/condominios/${condominium.id}/contatos`} {...linkProps}>
-            <Phone size={16} aria-hidden />
-            Contatos
+        ) : null}
+        {canSeeWorkOrders ? (
+          <S.SidebarItem to={`${base}/chamados`} {...linkProps}>
+            <Wrench size={16} aria-hidden />
+            Chamados
           </S.SidebarItem>
-        </>
-      ) : null}
-      {isOwner ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/equipe`} {...linkProps}>
-          <UserCog size={16} aria-hidden />
-          Equipe
-        </S.SidebarItem>
-      ) : null}
-      {canShareQr ? (
-        <S.SidebarItem to={`/app/condominios/${condominium.id}/qr-codes`} {...linkProps}>
-          <QrCode size={16} aria-hidden />
-          Página pública
-        </S.SidebarItem>
-      ) : null}
-      <S.SidebarLink
-        href={`/c/${condominium.slug}`}
-        target="_blank"
-        rel="noreferrer"
-        onClick={onNavigate}
-      >
-        <ExternalLink size={16} aria-hidden />
-        Ver página pública
-      </S.SidebarLink>
+        ) : null}
+      </NavSection>
     </>
   );
 }
@@ -282,15 +330,17 @@ export function ManagerLayout() {
         styles={{ body: { padding: 12 } }}
       >
         <S.DrawerNav aria-label="Navegação do condomínio">
-          <S.SidebarItem
-            to="/app"
-            onClick={() => {
-              closeMenu();
-            }}
-          >
-            <Building2 size={16} aria-hidden />
-            Meus condomínios
-          </S.SidebarItem>
+          <NavSection label="Geral">
+            <S.SidebarItem
+              to="/app"
+              onClick={() => {
+                closeMenu();
+              }}
+            >
+              <Building2 size={16} aria-hidden />
+              Meus condomínios
+            </S.SidebarItem>
+          </NavSection>
           <CondoNav condominium={condominium} onNavigate={closeMenu} />
         </S.DrawerNav>
       </Drawer>

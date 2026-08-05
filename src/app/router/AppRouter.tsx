@@ -36,7 +36,7 @@ import { EmployeeFormPage } from '@/features/staff/pages/EmployeeFormPage';
 import { PunchesAdminPage } from '@/features/staff/pages/PunchesAdminPage';
 import { AbsencesAdminPage } from '@/features/staff/pages/AbsencesAdminPage';
 import { TimeClockPage } from '@/features/staff/pages/TimeClockPage';
-import { CondoLocationPage } from '@/features/condominiums/pages/CondoLocationPage';
+import { CondoSettingsPage } from '@/features/condominiums/pages/CondoSettingsPage';
 import { VisitorsPage } from '@/features/visitors/pages/VisitorsPage';
 import { WorkOrdersPage } from '@/features/work-orders/pages/WorkOrdersPage';
 import { AppLayout } from '@/shared/components/AppLayout/AppLayout';
@@ -82,7 +82,8 @@ export function AppRouter() {
           <Route path="funcionarios/:id" element={<EmployeeFormPage />} />
           <Route path="ponto" element={<PunchesAdminPage />} />
           <Route path="faltas" element={<AbsencesAdminPage />} />
-          <Route path="localizacao" element={<CondoLocationPage />} />
+          <Route path="dados" element={<CondoSettingsPage />} />
+          <Route path="localizacao" element={<Navigate to="../dados" replace />} />
         </Route>
       </Route>
 

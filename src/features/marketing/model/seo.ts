@@ -33,7 +33,7 @@ export function buildJsonLdDocument(): Record<string, unknown> {
         '@type': 'Organization',
         name: SEO.siteName,
         url: SITE_URL,
-        logo: `${SITE_URL}/favicon.svg`,
+        logo: `${SITE_URL}/icon-512.png`,
         description: SEO.description,
       },
       {

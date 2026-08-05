@@ -76,7 +76,8 @@ export function CreateCondominiumPage() {
   const ownedCount =
     condominiumsQuery.data?.filter((condo) => condo.myRole === 'OWNER').length ?? 0;
 
-  const watched = Form.useWatch([], form);
+  // preserve: true — steps unmount Form.Items; without this, review sees empty values
+  const watched = Form.useWatch([], { form, preserve: true });
   const review = useMemo(() => {
     const values = (watched ?? {}) as Partial<FormValues>;
     const units = parseUnitNumbers(values.unitNumbers ?? '');
@@ -150,50 +151,67 @@ export function CreateCondominiumPage() {
   };
 
   const handleSubmit = () => {
-    void form.validateFields().then((values) => {
-      const unitNumbers = parseUnitNumbers(values.unitNumbers);
+    // Fields from prior steps are unmounted — getFieldsValue(true) reads preserved store values.
+    // Per-step validation already ran in goNext.
+    const values = form.getFieldsValue(true) as FormValues;
+    const name = values.name?.trim();
+    const slug = values.slug?.trim();
+    const unitNumbers = parseUnitNumbers(values.unitNumbers ?? '');
+    const address =
+      formatCondoAddress(values).trim() || String(values.address ?? '').trim();
 
-      if (!isSystemOwner && plan === 'lite' && unitNumbers.length > LITE_MAX_UNITS) {
-        setUnitUpgradeOpen(true);
-        return;
-      }
+    if (
+      !name ||
+      !slug ||
+      unitNumbers.length === 0 ||
+      !address ||
+      values.latitude == null ||
+      values.longitude == null
+    ) {
+      message.error('Dados incompletos. Volte e revise as etapas anteriores.');
+      return;
+    }
 
-      createCondominium.mutate(
-        {
-          name: values.name.trim(),
-          slug: slugify(values.slug),
-          unitNumbers,
-          buildingHandoverDate: values.buildingHandoverDate
-            ? values.buildingHandoverDate.format(DATE_FORMAT)
-            : null,
-          address: formatCondoAddress(values).trim() || values.address.trim(),
-          latitude: values.latitude,
-          longitude: values.longitude,
-          geofenceRadiusMeters: values.geofenceRadiusMeters ?? 100,
+    if (!isSystemOwner && plan === 'lite' && unitNumbers.length > LITE_MAX_UNITS) {
+      setUnitUpgradeOpen(true);
+      return;
+    }
+
+    createCondominium.mutate(
+      {
+        name,
+        slug: slugify(slug),
+        unitNumbers,
+        buildingHandoverDate: values.buildingHandoverDate
+          ? values.buildingHandoverDate.format(DATE_FORMAT)
+          : null,
+        address,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        geofenceRadiusMeters: values.geofenceRadiusMeters ?? 100,
+      },
+      {
+        onSuccess: (condominium) => {
+          message.success(`Condomínio "${condominium.name}" criado com sucesso.`);
+          void navigate(`/app/condominios/${condominium.id}`);
         },
-        {
-          onSuccess: (condominium) => {
-            message.success(`Condomínio "${condominium.name}" criado com sucesso.`);
-            void navigate(`/app/condominios/${condominium.id}`);
-          },
-          onError: (error: unknown) => {
-            if (error instanceof ApiError && error.code === 'PLAN_UNIT_LIMIT') {
-              setUnitUpgradeOpen(true);
-              return;
-            }
+        onError: (error: unknown) => {
+          if (error instanceof ApiError && error.code === 'PLAN_UNIT_LIMIT') {
+            setUnitUpgradeOpen(true);
+            return;
+          }
 
-            if (error instanceof ApiError && error.code === 'PLAN_CONDO_LIMIT') {
-              setCondoUpgradeOpen(true);
-              return;
-            }
+          if (error instanceof ApiError && error.code === 'PLAN_CONDO_LIMIT') {
+            setCondoUpgradeOpen(true);
+            return;
+          }
 
-            message.error(
-              error instanceof ApiError ? error.message : 'Não foi possível criar o condomínio.',
-            );
-          },
+          message.error(
+            error instanceof ApiError ? error.message : 'Não foi possível criar o condomínio.',
+          );
         },
-      );
-    });
+      },
+    );
   };
 
   const geocodeAddress = () => {

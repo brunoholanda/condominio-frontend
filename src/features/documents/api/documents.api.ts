@@ -38,6 +38,14 @@ export const documentsApi = {
     await httpClient.delete(`${resource(condominiumId)}/${id}`);
   },
 
+  async syncDataInventory(condominiumId: string): Promise<CondoDocument> {
+    const { data } = await httpClient.post<CondoDocument>(
+      `${resource(condominiumId)}/data-inventory/sync`,
+    );
+
+    return data;
+  },
+
   /** Lista pública, usada em `/c/:slug/documentos`. */
   async listPublic(slug: string): Promise<CondoDocument[]> {
     const { data } = await httpClient.get<CondoDocument[]>(`/c/${slug}/documents`);

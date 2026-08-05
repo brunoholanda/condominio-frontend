@@ -81,3 +81,12 @@ export function useDeleteDocumentMutation(condominiumId: string) {
     onSuccess: invalidate,
   });
 }
+
+export function useSyncDataInventoryMutation(condominiumId: string) {
+  const invalidate = useInvalidateDocuments(condominiumId);
+
+  return useMutation({
+    mutationFn: () => documentsApi.syncDataInventory(condominiumId),
+    onSuccess: invalidate,
+  });
+}

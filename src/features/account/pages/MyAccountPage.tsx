@@ -1,7 +1,7 @@
 import { App, Button, Skeleton, Tag } from 'antd';
-import { Check, CreditCard, LifeBuoy, Sparkles } from 'lucide-react';
+import { Check, CreditCard, LifeBuoy, Shield, Sparkles } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import {
@@ -130,6 +130,11 @@ export function MyAccountPage() {
       <PageHeading
         title="Minha conta"
         description="Plano, pagamento e chamados de suporte em um só lugar."
+        actions={
+          <Link to="/app/conta/inventario-lgpd">
+            <Button icon={<Shield size={16} />}>Inventário de dados (LGPD)</Button>
+          </Link>
+        }
       />
 
       <S.Profile>

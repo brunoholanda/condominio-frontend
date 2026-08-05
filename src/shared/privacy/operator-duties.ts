@@ -36,7 +36,8 @@ export const OPERATOR_REMINDER =
 export const EDIT_WARNING =
   'Você vai abrir para alteração dados pessoais protegidos pela Lei 13.709/2018 (LGPD). O cadastro é uma declaração ' +
   'assinada pelo morador: corrija somente o que ele pediu, confira cada campo antes de salvar e não preencha informações ' +
-  'por conta própria. O que você salvar substitui o registro anterior, e a alteração fica registrada com a sua identificação.';
+  'por conta própria. Se você trocar o proprietário ou inquilino (outro CPF), o cadastro anterior fica arquivado por 5 anos ' +
+  '(acesso restrito a síndico/gestor) e depois é eliminado automaticamente. A alteração fica registrada com a sua identificação.';
 
 /** Cabeçalho da consulta somente leitura, onde a ficha inteira fica exposta. */
 export const VIEW_ONLY_NOTICE =

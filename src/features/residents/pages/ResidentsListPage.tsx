@@ -1,6 +1,6 @@
 import { App, Button, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Eye, ExternalLink, FileDown, Pencil, Search, Trash2 } from 'lucide-react';
+import { Eye, ExternalLink, FileDown, History, Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ import { mobileOverlayWidth, mobileTableProps } from '@/shared/utils/mobile-ui';
 import { queries } from '@/styles/theme';
 import { ResidentDetailsDrawer } from '../components/ResidentDetailsDrawer/ResidentDetailsDrawer';
 import { ResidentsSummary } from '../components/ResidentsSummary/ResidentsSummary';
+import { UnitHistoryModal } from '../components/UnitHistoryModal/UnitHistoryModal';
 import {
   useDeleteResidentMutation,
   useResidentsQuery,
@@ -39,6 +40,10 @@ export function ResidentsListPage() {
   const [filters, setFilters] = useState<ResidentFilters>(INITIAL_FILTERS);
   const [viewingId, setViewingId] = useState<string>();
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [historyUnit, setHistoryUnit] = useState<string | null>(null);
+
+  const canManageHistory =
+    condominium.myRole === 'OWNER' || condominium.myRole === 'MANAGER';
 
   const residentsQuery = useResidentsQuery(condominium.id, filters);
   const deleteResident = useDeleteResidentMutation();
@@ -153,7 +158,7 @@ export function ResidentsListPage() {
     {
       title: 'Ações',
       key: 'actions',
-      width: isMobile ? 132 : 230,
+      width: isMobile ? 132 : canManageHistory ? 280 : 230,
       align: 'right',
       render: (_value, resident) => (
         <S.RowActions>
@@ -166,6 +171,17 @@ export function ResidentsListPage() {
           >
             {isMobile ? null : 'Visualizar'}
           </Button>
+          {canManageHistory ? (
+            <Button
+              type="text"
+              size="small"
+              icon={<History size={15} />}
+              aria-label={`Histórico da unidade ${resident.unit}`}
+              onClick={() => setHistoryUnit(resident.unit)}
+            >
+              {isMobile ? null : 'Histórico'}
+            </Button>
+          ) : null}
           <Button
             type="text"
             size="small"
@@ -177,7 +193,7 @@ export function ResidentsListPage() {
           </Button>
           <Popconfirm
             title="Remover cadastro"
-            description="Os dados vinculados também serão apagados."
+            description="O cadastro ativo será removido. A versão atual fica arquivada por 5 anos (síndico/gestor) e depois é eliminada."
             okText="Remover"
             cancelText="Cancelar"
             okButtonProps={{ danger: true }}
@@ -263,6 +279,15 @@ export function ResidentsListPage() {
         onClose={() => setIsViewOpen(false)}
         onEdit={confirmEdit}
       />
+
+      {canManageHistory ? (
+        <UnitHistoryModal
+          condominiumId={condominium.id}
+          unit={historyUnit}
+          open={Boolean(historyUnit)}
+          onClose={() => setHistoryUnit(null)}
+        />
+      ) : null}
     </>
   );
 }

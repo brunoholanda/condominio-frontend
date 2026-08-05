@@ -22,7 +22,7 @@ function controllerName(condoName?: string): string {
 export const PRIVACY_CONTACT =
   import.meta.env.VITE_PRIVACY_CONTACT?.trim() || 'a administração do condomínio';
 
-export const PRIVACY_NOTICE_VERSION = 'Versão 1 · julho de 2026';
+export const PRIVACY_NOTICE_VERSION = 'Versão 2 · agosto de 2026';
 
 export function buildConsentText(condoName?: string): string {
   const controller = controllerName(condoName);
@@ -86,8 +86,10 @@ export function buildPrivacyTopics(condoName?: string): readonly PrivacyTopic[] 
     {
       title: 'Por quanto tempo ficam guardados',
       text:
-        'Enquanto durar o vínculo da pessoa com a unidade e, depois disso, pelo prazo necessário para o condomínio cumprir suas ' +
-        'obrigações legais e se defender em eventual processo. Vencido o prazo, o cadastro é eliminado.',
+        'Enquanto durar o vínculo da pessoa com a unidade no cadastro ativo. Quando o proprietário ou inquilino da ' +
+        'unidade for substituído (outro titular) ou o cadastro for excluído, a versão anterior fica arquivada por 5 anos ' +
+        'para o condomínio cumprir obrigações legais e se defender em eventual processo; ao fim desse prazo, o arquivo é ' +
+        'eliminado automaticamente. Simples correções no mesmo titular não geram arquivo histórico.',
     },
     {
       title: 'Seus direitos',

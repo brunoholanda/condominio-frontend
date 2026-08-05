@@ -31,6 +31,7 @@ import { PlatformAccountsPage } from '@/features/platform-admin/pages/PlatformAc
 import { AdminSupportTicketsPage } from '@/features/support/pages/AdminSupportTicketsPage';
 import { MySupportTicketsPage } from '@/features/support/pages/MySupportTicketsPage';
 import { MyAccountPage } from '@/features/account/pages/MyAccountPage';
+import { DataInventoryPage } from '@/features/privacy/pages/DataInventoryPage';
 import { EmployeesListPage } from '@/features/staff/pages/EmployeesListPage';
 import { EmployeeFormPage } from '@/features/staff/pages/EmployeeFormPage';
 import { PunchesAdminPage } from '@/features/staff/pages/PunchesAdminPage';
@@ -110,6 +111,7 @@ export function AppRouter() {
           <Route path="c/:slug/reservas" element={<ResidentBookingsPage />} />
           <Route path="app" element={<MyCondominiumsPage />} />
           <Route path="app/conta" element={<MyAccountPage />} />
+          <Route path="app/conta/inventario-lgpd" element={<DataInventoryPage />} />
           <Route path="app/suporte" element={<MySupportTicketsPage />} />
           <Route path="app/admin/contas" element={<PlatformAccountsPage />} />
           <Route path="app/admin/chamados" element={<AdminSupportTicketsPage />} />

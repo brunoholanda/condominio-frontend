@@ -1,6 +1,6 @@
-import { App, Button, Drawer, Form, Input, Popconfirm, Select, Skeleton, Switch, Table, Tag } from 'antd';
+import { App, Button, Drawer, Form, Input, Popconfirm, Select, Skeleton, Space, Switch, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, FileText, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { useManagerCondominium } from '@/features/condominiums/components/ManagerLayout';
@@ -14,13 +14,17 @@ import {
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
   useDocumentsQuery,
+  useSyncDataInventoryMutation,
   useUpdateDocumentMutation,
 } from '../hooks/use-documents';
 import type { CondoDocument, DocumentPayload, DocumentType } from '../model/document.types';
-import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '../model/document.types';
+import { DOCUMENT_TYPE_LABELS, MANUAL_DOCUMENT_TYPES } from '../model/document.types';
 import * as S from './DocumentsAdminPage.styles';
 
-const TYPE_OPTIONS = DOCUMENT_TYPES.map((value) => ({ value, label: DOCUMENT_TYPE_LABELS[value] }));
+const TYPE_OPTIONS = MANUAL_DOCUMENT_TYPES.map((value) => ({
+  value,
+  label: DOCUMENT_TYPE_LABELS[value],
+}));
 
 interface DocumentFormValues {
   type: DocumentType;
@@ -36,11 +40,13 @@ export function DocumentsAdminPage() {
   const [form] = Form.useForm<DocumentFormValues>();
   const [editing, setEditing] = useState<CondoDocument | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewing, setViewing] = useState<CondoDocument | null>(null);
 
   const documentsQuery = useDocumentsQuery(condominium.id);
   const createDocument = useCreateDocumentMutation(condominium.id);
   const updateDocument = useUpdateDocumentMutation(condominium.id);
   const deleteDocument = useDeleteDocumentMutation(condominium.id);
+  const syncInventory = useSyncDataInventoryMutation(condominium.id);
 
   const documents = documentsQuery.data ?? [];
 
@@ -52,6 +58,12 @@ export function DocumentsAdminPage() {
   };
 
   const openEdit = (document: CondoDocument) => {
+    if (document.type === 'DATA_INVENTORY') {
+      setViewing(document);
+
+      return;
+    }
+
     setEditing(document);
     form.setFieldsValue({
       type: document.type,
@@ -60,6 +72,16 @@ export function DocumentsAdminPage() {
       isPublic: document.isPublic,
     });
     setDrawerOpen(true);
+  };
+
+  const handleSyncInventory = () => {
+    syncInventory.mutate(undefined, {
+      onSuccess: () => message.success('Inventário LGPD atualizado.'),
+      onError: (error: unknown) =>
+        message.error(
+          error instanceof ApiError ? error.message : 'Não foi possível atualizar o inventário.',
+        ),
+    });
   };
 
   const handleSubmit = (values: DocumentFormValues) => {
@@ -121,25 +143,33 @@ export function DocumentsAdminPage() {
       key: 'actions',
       width: 110,
       align: 'right',
-      render: (_value, document) => (
-        <>
+      render: (_value, document) =>
+        document.type === 'DATA_INVENTORY' ? (
           <Button
             type="text"
             size="small"
-            icon={<Pencil size={15} />}
-            onClick={() => openEdit(document)}
+            icon={<Eye size={15} />}
+            onClick={() => setViewing(document)}
           />
-          <Popconfirm
-            title="Remover documento"
-            okText="Remover"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => handleDelete(document)}
-          >
-            <Button type="text" size="small" danger icon={<Trash2 size={15} />} />
-          </Popconfirm>
-        </>
-      ),
+        ) : (
+          <>
+            <Button
+              type="text"
+              size="small"
+              icon={<Pencil size={15} />}
+              onClick={() => openEdit(document)}
+            />
+            <Popconfirm
+              title="Remover documento"
+              okText="Remover"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => handleDelete(document)}
+            >
+              <Button type="text" size="small" danger icon={<Trash2 size={15} />} />
+            </Popconfirm>
+          </>
+        ),
     },
   ];
 
@@ -147,11 +177,20 @@ export function DocumentsAdminPage() {
     <>
       <PageHeading
         title="Documentos"
-        description="Avisos, atas e convocações de assembleia. Documentos públicos aparecem na página do condomínio."
+        description="Avisos, atas e convocações. O inventário LGPD é interno e atualizado pelo botão abaixo."
         actions={
-          <Button type="primary" icon={<Plus size={16} />} onClick={openCreate}>
-            Novo documento
-          </Button>
+          <Space wrap>
+            <Button
+              icon={<Shield size={16} />}
+              loading={syncInventory.isPending}
+              onClick={handleSyncInventory}
+            >
+              Atualizar inventário LGPD
+            </Button>
+            <Button type="primary" icon={<Plus size={16} />} onClick={openCreate}>
+              Novo documento
+            </Button>
+          </Space>
         }
       />
 
@@ -174,12 +213,20 @@ export function DocumentsAdminPage() {
                   <Tag>{DOCUMENT_TYPE_LABELS[document.type]}</Tag>
                 </S.CardTags>
                 <S.CardActions>
-                  <Button icon={<Pencil size={16} />} onClick={() => openEdit(document)}>
-                    Editar
-                  </Button>
-                  <Button danger icon={<Trash2 size={16} />} onClick={() => handleDelete(document)}>
-                    Remover
-                  </Button>
+                  {document.type === 'DATA_INVENTORY' ? (
+                    <Button icon={<Eye size={16} />} onClick={() => setViewing(document)}>
+                      Ver inventário
+                    </Button>
+                  ) : (
+                    <>
+                      <Button icon={<Pencil size={16} />} onClick={() => openEdit(document)}>
+                        Editar
+                      </Button>
+                      <Button danger icon={<Trash2 size={16} />} onClick={() => handleDelete(document)}>
+                        Remover
+                      </Button>
+                    </>
+                  )}
                 </S.CardActions>
               </S.ItemCard>
             ))}
@@ -232,6 +279,19 @@ export function DocumentsAdminPage() {
             <Switch />
           </Form.Item>
         </Form>
+      </Drawer>
+
+      <Drawer
+        open={Boolean(viewing)}
+        title={viewing?.title ?? 'Inventário LGPD'}
+        width={mobileOverlayWidth(isMobile, 640)}
+        onClose={() => setViewing(null)}
+      >
+        {viewing ? (
+          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
+            {viewing.body}
+          </pre>
+        ) : null}
       </Drawer>
     </>
   );
